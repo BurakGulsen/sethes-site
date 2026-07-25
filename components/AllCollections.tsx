@@ -35,10 +35,12 @@ export const AllCollections: React.FC<AllCollectionsProps> = ({ onCategoryClick 
             onClick={() => onCategoryClick(cat.id)}
             className="group cursor-pointer relative aspect-[4/5] overflow-hidden bg-stone-900"
           >
-            <img 
-              src={cat.image} 
-              alt={cat.name} 
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+            <img
+              src={cat.image}
+              alt={cat.name}
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex flex-col justify-end p-8">
               <h3 className="text-white text-3xl md:text-4xl font-condensed uppercase">{cat.name}</h3>

@@ -135,10 +135,12 @@ export const Home: React.FC = () => {
                   >
                       {categories.map(cat => (
                           <div key={cat.id} onClick={() => handleCardClick(cat.id)} className="min-w-[300px] md:min-w-[400px] snap-center flex-shrink-0 group cursor-pointer relative aspect-[4/5] overflow-hidden bg-stone-200">
-                              <img 
-                                  src={cat.image} 
-                                  alt={cat.name} 
-                                  className="absolute inset-0 w-full h-full !object-cover object-center transition-transform duration-700 group-hover:scale-105 pointer-events-none" 
+                              <img
+                                  src={cat.image}
+                                  alt={cat.name}
+                                  loading="lazy"
+                                  decoding="async"
+                                  className="absolute inset-0 w-full h-full !object-cover object-center transition-transform duration-700 group-hover:scale-105 pointer-events-none"
                               />
                               <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex flex-col justify-end p-8 pointer-events-none">
                                   <h3 className="text-white text-3xl font-condensed uppercase">{cat.name}</h3>

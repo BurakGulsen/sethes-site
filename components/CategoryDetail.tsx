@@ -54,11 +54,19 @@ export const CategoryDetail: React.FC<CategoryDetailProps> = ({ categoryData, pr
             >
               <div className={`w-full aspect-[4/3] overflow-hidden ${isDark ? 'bg-[#0a0a0a]' : 'bg-[#e0e0e0]'} mb-2 relative`}>
                 <div className={`absolute inset-0 transition-colors duration-500 z-10 ${isDark ? 'bg-transparent group-hover:bg-white/5' : 'bg-white/10 group-hover:bg-transparent'}`}></div>
-                <img 
-                  src={item.image} 
-                  alt={item.name} 
-                  className={`w-full h-full object-contain p-8 md:p-12 transition-transform duration-700 group-hover:scale-105 ${isDark ? 'mix-blend-normal' : ''}`}
-                />
+                {item.image ? (
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    loading="lazy"
+                    decoding="async"
+                    className={`w-full h-full object-contain p-8 md:p-12 transition-transform duration-700 group-hover:scale-105 ${isDark ? 'mix-blend-normal' : ''}`}
+                  />
+                ) : (
+                  <div className={`w-full h-full flex items-center justify-center text-xs tracking-widest uppercase ${isDark ? 'text-stone-600' : 'text-stone-400'}`}>
+                    {t('productGrid.noImage')}
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-col items-start pl-1 mt-6">

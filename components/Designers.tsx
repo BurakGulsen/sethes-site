@@ -27,7 +27,7 @@ const DesignerCard: React.FC<DesignerProps> = ({ name, role, bio, collections, q
       {/* Image Side */}
       <div className="w-full md:w-1/3 flex-shrink-0">
         <div className={`aspect-[3/4] bg-stone-200 overflow-hidden ${grayscaleEnabled ? 'grayscale hover:grayscale-0' : ''} transition-all duration-700`}>
-          <img src={image} alt={name} className="w-full h-full object-cover" />
+          <img src={image} alt={name} loading="lazy" decoding="async" className="w-full h-full object-cover" />
         </div>
       </div>
 

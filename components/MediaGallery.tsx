@@ -78,6 +78,8 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({ category }) => {
                     <img
                       src={item.cover_image}
                       alt={language === 'tr' && item.title_tr ? item.title_tr : item.title}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   ) : (

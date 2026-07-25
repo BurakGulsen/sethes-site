@@ -70,6 +70,8 @@ export const Catalogues: React.FC = () => {
                     <img
                       src={catalogue.cover_image}
                       alt={language === 'tr' && catalogue.title_tr ? catalogue.title_tr : catalogue.title}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   ) : (

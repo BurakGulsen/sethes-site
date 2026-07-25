@@ -311,7 +311,13 @@ export const Dashboard = () => {
       let imageUrl = prodForm.image;
       if (prodImageFile) {
           const url = await uploadFile(prodImageFile, 'products');
-          if (url) imageUrl = url;
+          if (!url) {
+              // uploadFile already alerted with the reason (e.g. file too large).
+              // Stop here instead of saving the product with a blank/stale image.
+              setIsUploading(false);
+              return;
+          }
+          imageUrl = url;
       }
 
       // Handle 3 PDF uploads

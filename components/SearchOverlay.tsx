@@ -109,9 +109,11 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose, o
                     }}
                   >
                     <div className="w-24 h-24 md:w-32 md:h-32 bg-stone-900 overflow-hidden flex-shrink-0">
-                      <img 
-                        src={product.image} 
+                      <img
+                        src={product.image}
                         alt={product.name}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
                       />
                     </div>
