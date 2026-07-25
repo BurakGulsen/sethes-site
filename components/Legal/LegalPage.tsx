@@ -4,7 +4,7 @@ import { useLocalizedSiteData } from '../../context/SiteContext';
 
 export const LegalPage: React.FC<{ variant: 'terms' | 'privacy' }> = ({ variant }) => {
   const { language, t } = useLanguage();
-  const { getSetting } = useLocalizedSiteData();
+  const { getSetting, isLoading } = useLocalizedSiteData();
   const title = variant === 'terms' ? t('legal.termsTitle') : t('legal.privacyTitle');
 
   const baseKey = variant === 'terms' ? 'legal_terms_content' : 'legal_privacy_content';
@@ -21,7 +21,7 @@ export const LegalPage: React.FC<{ variant: 'terms' | 'privacy' }> = ({ variant 
       <div className="max-w-2xl mx-auto px-6 pb-24">
         <h1 className="text-3xl font-condensed uppercase tracking-wide mb-6">{title}</h1>
 
-        {content ? (
+        {isLoading ? null : content ? (
           <div
             className="max-w-none text-sm leading-relaxed text-stone-700
               [&_h2]:text-xl [&_h2]:font-bold [&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:text-stone-900
