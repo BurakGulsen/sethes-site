@@ -1,11 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Plus, Trash2, Layers, Box, FileText, Pencil, X, Upload, FileDown, Share2, Users, Folder, MapPin } from 'lucide-react';
+import { LogOut, Plus, Trash2, Layers, Box, FileText, Pencil, X, Upload, FileDown, Share2, Users, Folder, MapPin, Palette } from 'lucide-react';
 import { useSiteData } from '../../context/SiteContext';
 import { Product, Category, Designer } from '../../types';
 import { AdminMedia } from './AdminMedia';
 import { AdminContacts } from './AdminContacts';
+import { AdminMaterials } from './AdminMaterials';
 
 export const Dashboard = () => {
   const navigate = useNavigate();
@@ -24,10 +25,11 @@ export const Dashboard = () => {
     updateDesigner,
     deleteDesigner,
     uploadFile,
+    uploadPrivateFile,
     updateSiteSetting
   } = useSiteData();
   
-  const [activeTab, setActiveTab] = useState<'PRODUCTS' | 'CATEGORIES' | 'SETTINGS' | 'DESIGNERS' | 'MEDIA' | 'CONTACTS'>('PRODUCTS');
+  const [activeTab, setActiveTab] = useState<'PRODUCTS' | 'CATEGORIES' | 'SETTINGS' | 'DESIGNERS' | 'MEDIA' | 'MATERIALS' | 'CONTACTS'>('PRODUCTS');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -82,9 +84,9 @@ export const Dashboard = () => {
   }, [siteSettings]);
 
   // Category Form State
-  const [catForm, setCatForm] = useState({ name: '', image: '', description: '' });
+  const [catForm, setCatForm] = useState({ name: '', image: '', description: '', name_tr: '', description_tr: '' });
   const [catImageFile, setCatImageFile] = useState<File | null>(null);
-  
+
   // Product Form State
   const [prodForm, setProdForm] = useState({
       category_id: '',
@@ -99,7 +101,14 @@ export const Dashboard = () => {
       dimensions: '',
       details: '',
       lightSource: '', // Form input uses camelCase for React state
-      more_info: ''
+      more_info: '',
+      // Turkish counterparts
+      name_tr: '',
+      description_tr: '',
+      dimensions_tr: '',
+      details_tr: '',
+      lightSource_tr: '',
+      more_info_tr: ''
   });
 
   // Designer Form State
@@ -109,7 +118,11 @@ export const Dashboard = () => {
       bio: '',
       collections: '',
       quote: '',
-      image_url: ''
+      image_url: '',
+      role_tr: '',
+      bio_tr: '',
+      collections_tr: '',
+      quote_tr: ''
   });
   const [desImageFile, setDesImageFile] = useState<File | null>(null);
   
@@ -136,28 +149,29 @@ export const Dashboard = () => {
     setEditingId(null);
     
     // Reset Category Form
-    setCatForm({ name: '', image: '', description: '' });
+    setCatForm({ name: '', image: '', description: '', name_tr: '', description_tr: '' });
     setCatImageFile(null);
     if (catImageInputRef.current) catImageInputRef.current.value = '';
-    
+
     // Reset Product Form
-    setProdForm({ 
-        category_id: '', name: '', image: '', description: '', 
-        designer: '', pdf_sheet: '', pdf_images: '', pdf_technical: '', 
-        dimensions: '', details: '', lightSource: '', more_info: '' 
+    setProdForm({
+        category_id: '', name: '', image: '', description: '',
+        designer: '', pdf_sheet: '', pdf_images: '', pdf_technical: '',
+        dimensions: '', details: '', lightSource: '', more_info: '',
+        name_tr: '', description_tr: '', dimensions_tr: '', details_tr: '', lightSource_tr: '', more_info_tr: ''
     });
     setProdImageFile(null);
     setFileSheet(null);
     setFileImages(null);
     setFileTech(null);
-    
+
     if (prodImageInputRef.current) prodImageInputRef.current.value = '';
     if (fileSheetRef.current) fileSheetRef.current.value = '';
     if (fileImagesRef.current) fileImagesRef.current.value = '';
     if (fileTechRef.current) fileTechRef.current.value = '';
 
     // Reset Designer Form
-    setDesForm({ name: '', role: '', bio: '', collections: '', quote: '', image_url: '' });
+    setDesForm({ name: '', role: '', bio: '', collections: '', quote: '', image_url: '', role_tr: '', bio_tr: '', collections_tr: '', quote_tr: '' });
     setDesImageFile(null);
     if (desImageInputRef.current) desImageInputRef.current.value = '';
   };
@@ -169,7 +183,9 @@ export const Dashboard = () => {
         setCatForm({
             name: cat.name,
             image: cat.image,
-            description: cat.description || ''
+            description: cat.description || '',
+            name_tr: cat.name_tr || '',
+            description_tr: cat.description_tr || ''
         });
         setActiveTab('CATEGORIES');
     } else if (type === 'DESIGNER') {
@@ -180,7 +196,11 @@ export const Dashboard = () => {
             bio: des.bio,
             collections: des.collections,
             quote: des.quote,
-            image_url: des.image_url
+            image_url: des.image_url,
+            role_tr: des.role_tr || '',
+            bio_tr: des.bio_tr || '',
+            collections_tr: des.collections_tr || '',
+            quote_tr: des.quote_tr || ''
         });
         setActiveTab('DESIGNERS');
     } else {
@@ -197,7 +217,13 @@ export const Dashboard = () => {
             dimensions: prod.dimensions?.join(', ') || '',
             details: prod.details?.join(', ') || '',
             lightSource: prod.lightSource?.join(', ') || '',
-            more_info: prod.more_info || ''
+            more_info: prod.more_info || '',
+            name_tr: prod.name_tr || '',
+            description_tr: prod.description_tr || '',
+            dimensions_tr: prod.dimensions_tr?.join(', ') || '',
+            details_tr: prod.details_tr?.join(', ') || '',
+            lightSource_tr: prod.lightSource_tr?.join(', ') || '',
+            more_info_tr: prod.more_info_tr || ''
         });
         setActiveTab('PRODUCTS');
     }
@@ -273,10 +299,10 @@ export const Dashboard = () => {
           if (url) urlImages = url;
       }
 
-      // 3. Technical
+      // 3. Technical (2D/3D — private bucket, login required to download)
       let urlTech = prodForm.pdf_technical;
       if (fileTech) {
-          const url = await uploadFile(fileTech, 'docs');
+          const url = await uploadPrivateFile(fileTech, 'technical');
           if (url) urlTech = url;
       }
 
@@ -297,12 +323,20 @@ export const Dashboard = () => {
           
           dimensions: prodForm.dimensions.split(',').map(s => s.trim()).filter(s => s),
           details: prodForm.details.split(',').map(s => s.trim()).filter(s => s),
-          
+
           // DIRECT DB MAPPING: light_source
           light_source: prodForm.lightSource.split(',').map(s => s.trim()).filter(s => s),
-          
+
           notes: [],
-          more_info: prodForm.more_info
+          more_info: prodForm.more_info,
+
+          // Turkish counterparts
+          name_tr: prodForm.name_tr,
+          description_tr: prodForm.description_tr,
+          dimensions_tr: prodForm.dimensions_tr.split(',').map(s => s.trim()).filter(s => s),
+          details_tr: prodForm.details_tr.split(',').map(s => s.trim()).filter(s => s),
+          light_source_tr: prodForm.lightSource_tr.split(',').map(s => s.trim()).filter(s => s),
+          more_info_tr: prodForm.more_info_tr
       };
 
       if (editingId) {
@@ -318,7 +352,7 @@ export const Dashboard = () => {
     <div className="min-h-screen bg-[#101010] text-stone-300 font-sans pb-20">
       {/* Admin Header */}
       <header className="border-b border-stone-800 bg-[#050505] px-8 py-4 flex justify-between items-center sticky top-0 z-50">
-        <div className="font-condensed text-xl tracking-widest text-white">ARBEM <span className="text-stone-600">ADMIN</span></div>
+        <div className="font-condensed text-xl tracking-widest text-white">SETHES <span className="text-stone-600">ADMIN</span></div>
         <div className="flex items-center gap-6">
             <span className="text-xs text-stone-500 uppercase">CMS Dashboard</span>
             <button onClick={handleLogout} className="flex items-center gap-2 text-xs uppercase tracking-wider hover:text-white transition-colors">
@@ -354,7 +388,13 @@ export const Dashboard = () => {
               >
                   <Folder size={16} /> Media
               </button>
-              <button 
+              <button
+                onClick={() => { setActiveTab('MATERIALS'); resetForms(); }}
+                className={`pb-4 text-sm font-bold uppercase tracking-widest flex items-center gap-2 transition-colors ${activeTab === 'MATERIALS' ? 'text-white border-b-2 border-white' : 'text-stone-600 hover:text-stone-400'}`}
+              >
+                  <Palette size={16} /> Materials
+              </button>
+              <button
                 onClick={() => { setActiveTab('CONTACTS'); resetForms(); }}
                 className={`pb-4 text-sm font-bold uppercase tracking-widest flex items-center gap-2 transition-colors ${activeTab === 'CONTACTS' ? 'text-white border-b-2 border-white' : 'text-stone-600 hover:text-stone-400'}`}
               >
@@ -371,6 +411,8 @@ export const Dashboard = () => {
           {/* CONTENT AREA */}
           {activeTab === 'MEDIA' ? (
               <AdminMedia />
+          ) : activeTab === 'MATERIALS' ? (
+              <AdminMaterials />
           ) : activeTab === 'CONTACTS' ? (
               <AdminContacts />
           ) : activeTab === 'SETTINGS' ? (
@@ -431,11 +473,10 @@ export const Dashboard = () => {
                                       <div className="flex gap-2">
                                           <input 
                                               type="text" 
-                                              defaultValue={siteSettings.find(s => s.key === 'logo_text')?.value || 'ARBEM'}
+                                              defaultValue={siteSettings.find(s => s.key === 'logo_text')?.value || 'SETHES'}
                                               onBlur={(e) => updateSiteSetting('logo_text', e.target.value)}
                                               className="bg-black border border-stone-800 text-white p-3 w-full text-sm focus:border-white outline-none transition-colors"
                                               onMouseDown={(e) => e.stopPropagation()}
-                                              onSelect={(e) => (e.target as HTMLElement).focus()}
                                           />
                                       </div>
                                   </div>
@@ -604,36 +645,69 @@ export const Dashboard = () => {
                                         defaultValue={siteSettings?.find(s => s.key === 'hero_title')?.value || ''}
                                         placeholder="e.g. S34/4 COLLECTION"
                                         onMouseDown={(e) => e.stopPropagation()}
-                                        onSelect={(e) => (e.target as HTMLElement).focus()}
                                         onBlur={(e) => updateSiteSetting('hero_title', e.target.value)}
                                       />
                                   </div>
                               </div>
-                              
+
+                              <div>
+                                  <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Hero Title (Türkçe)</label>
+                                  <div className="flex gap-2">
+                                      <input
+                                        className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none select-text cursor-text"
+                                        defaultValue={siteSettings?.find(s => s.key === 'hero_title_tr')?.value || ''}
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                        onBlur={(e) => updateSiteSetting('hero_title_tr', e.target.value)}
+                                      />
+                                  </div>
+                              </div>
+
                               <div>
                                   <label className="text-[10px] uppercase font-bold text-stone-500 block mb-2">Hero Subtitle</label>
                                   <div className="flex gap-2">
-                                      <input 
+                                      <input
                                         className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none select-text cursor-text"
                                         defaultValue={siteSettings?.find(s => s.key === 'hero_subtitle')?.value || ''}
                                         placeholder="e.g. UNWRITTEN STREETS"
                                         onMouseDown={(e) => e.stopPropagation()}
-                                        onSelect={(e) => (e.target as HTMLElement).focus()}
                                         onBlur={(e) => updateSiteSetting('hero_subtitle', e.target.value)}
                                       />
                                   </div>
                               </div>
-                              
+
+                              <div>
+                                  <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Hero Subtitle (Türkçe)</label>
+                                  <div className="flex gap-2">
+                                      <input
+                                        className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none select-text cursor-text"
+                                        defaultValue={siteSettings?.find(s => s.key === 'hero_subtitle_tr')?.value || ''}
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                        onBlur={(e) => updateSiteSetting('hero_subtitle_tr', e.target.value)}
+                                      />
+                                  </div>
+                              </div>
+
                               <div className="border-t border-stone-800 pt-4 mt-4">
                                   <label className="text-[10px] uppercase font-bold text-stone-500 block mb-2">Collections Section Title</label>
                                   <div className="flex gap-2">
-                                      <input 
+                                      <input
                                         className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none select-text cursor-text"
                                         defaultValue={siteSettings?.find(s => s.key === 'collections_title')?.value || 'COLLECTIONS'}
                                         placeholder="e.g. COLLECTIONS"
                                         onMouseDown={(e) => e.stopPropagation()}
-                                        onSelect={(e) => (e.target as HTMLElement).focus()}
                                         onBlur={(e) => updateSiteSetting('collections_title', e.target.value)}
+                                      />
+                                  </div>
+                              </div>
+
+                              <div>
+                                  <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Collections Section Title (Türkçe)</label>
+                                  <div className="flex gap-2">
+                                      <input
+                                        className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none select-text cursor-text"
+                                        defaultValue={siteSettings?.find(s => s.key === 'collections_title_tr')?.value || ''}
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                        onBlur={(e) => updateSiteSetting('collections_title_tr', e.target.value)}
                                       />
                                   </div>
                               </div>
@@ -647,23 +721,41 @@ export const Dashboard = () => {
                                           <label className="text-[10px] uppercase font-bold text-stone-500 block mb-2">Story Title</label>
                                           <input 
                                             className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none select-text cursor-text"
-                                            defaultValue={siteSettings?.find(s => s.key === 'story_title')?.value || 'THE ARBEM STORY'}
-                                            placeholder="e.g. THE ARBEM STORY"
+                                            defaultValue={siteSettings?.find(s => s.key === 'story_title')?.value || 'THE SETHES STORY'}
+                                            placeholder="e.g. THE SETHES STORY"
                                             onMouseDown={(e) => e.stopPropagation()}
-                                            onSelect={(e) => (e.target as HTMLElement).focus()}
                                             onBlur={(e) => updateSiteSetting('story_title', e.target.value)}
                                           />
                                       </div>
-                                      
+
+                                      <div>
+                                          <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Story Title (Türkçe)</label>
+                                          <input
+                                            className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none select-text cursor-text"
+                                            defaultValue={siteSettings?.find(s => s.key === 'story_title_tr')?.value || ''}
+                                            onMouseDown={(e) => e.stopPropagation()}
+                                            onBlur={(e) => updateSiteSetting('story_title_tr', e.target.value)}
+                                          />
+                                      </div>
+
                                       <div>
                                           <label className="text-[10px] uppercase font-bold text-stone-500 block mb-2">Story Description</label>
-                                          <textarea 
+                                          <textarea
                                             className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none h-32 select-text cursor-text"
                                             defaultValue={siteSettings?.find(s => s.key === 'story_description')?.value || ''}
                                             placeholder="Enter the story description..."
                                             onMouseDown={(e) => e.stopPropagation()}
-                                            onSelect={(e) => (e.target as HTMLElement).focus()}
                                             onBlur={(e) => updateSiteSetting('story_description', e.target.value)}
+                                          />
+                                      </div>
+
+                                      <div>
+                                          <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Story Description (Türkçe)</label>
+                                          <textarea
+                                            className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none h-32 select-text cursor-text"
+                                            defaultValue={siteSettings?.find(s => s.key === 'story_description_tr')?.value || ''}
+                                            onMouseDown={(e) => e.stopPropagation()}
+                                            onBlur={(e) => updateSiteSetting('story_description_tr', e.target.value)}
                                           />
                                       </div>
 
@@ -721,20 +813,38 @@ export const Dashboard = () => {
                                             defaultValue={siteSettings?.find(s => s.key === 'bespoke_title')?.value || 'BESPOKE PROJECTS'}
                                             placeholder="e.g. BESPOKE PROJECTS"
                                             onMouseDown={(e) => e.stopPropagation()}
-                                            onSelect={(e) => (e.target as HTMLElement).focus()}
                                             onBlur={(e) => updateSiteSetting('bespoke_title', e.target.value)}
                                           />
                                       </div>
-                                      
+
+                                      <div>
+                                          <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Section Title (Türkçe)</label>
+                                          <input
+                                            className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none select-text cursor-text"
+                                            defaultValue={siteSettings?.find(s => s.key === 'bespoke_title_tr')?.value || ''}
+                                            onMouseDown={(e) => e.stopPropagation()}
+                                            onBlur={(e) => updateSiteSetting('bespoke_title_tr', e.target.value)}
+                                          />
+                                      </div>
+
                                       <div>
                                           <label className="text-[10px] uppercase font-bold text-stone-500 block mb-2">Subtitle / Description</label>
-                                          <textarea 
+                                          <textarea
                                             className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none h-24 select-text cursor-text"
                                             defaultValue={siteSettings?.find(s => s.key === 'bespoke_subtitle')?.value || 'Signature stone washbasins and integrated water systems.'}
                                             placeholder="Enter the subtitle..."
                                             onMouseDown={(e) => e.stopPropagation()}
-                                            onSelect={(e) => (e.target as HTMLElement).focus()}
                                             onBlur={(e) => updateSiteSetting('bespoke_subtitle', e.target.value)}
+                                          />
+                                      </div>
+
+                                      <div>
+                                          <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Subtitle / Description (Türkçe)</label>
+                                          <textarea
+                                            className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none h-24 select-text cursor-text"
+                                            defaultValue={siteSettings?.find(s => s.key === 'bespoke_subtitle_tr')?.value || ''}
+                                            onMouseDown={(e) => e.stopPropagation()}
+                                            onBlur={(e) => updateSiteSetting('bespoke_subtitle_tr', e.target.value)}
                                           />
                                       </div>
 
@@ -791,23 +901,41 @@ export const Dashboard = () => {
                                           <label className="text-[10px] uppercase font-bold text-stone-500 block mb-2">Footer Title</label>
                                           <input 
                                             className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none select-text cursor-text"
-                                            defaultValue={siteSettings?.find(s => s.key === 'footer_title')?.value || 'ARBEM ATELIER'}
-                                            placeholder="e.g. ARBEM ATELIER"
+                                            defaultValue={siteSettings?.find(s => s.key === 'footer_title')?.value || 'SETHES ATELIER'}
+                                            placeholder="e.g. SETHES ATELIER"
                                             onMouseDown={(e) => e.stopPropagation()}
-                                            onSelect={(e) => (e.target as HTMLElement).focus()}
                                             onBlur={(e) => updateSiteSetting('footer_title', e.target.value)}
                                           />
                                       </div>
-                                      
+
+                                      <div>
+                                          <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Footer Title (Türkçe)</label>
+                                          <input
+                                            className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none select-text cursor-text"
+                                            defaultValue={siteSettings?.find(s => s.key === 'footer_title_tr')?.value || ''}
+                                            onMouseDown={(e) => e.stopPropagation()}
+                                            onBlur={(e) => updateSiteSetting('footer_title_tr', e.target.value)}
+                                          />
+                                      </div>
+
                                       <div>
                                           <label className="text-[10px] uppercase font-bold text-stone-500 block mb-2">Footer Subtitle</label>
-                                          <textarea 
+                                          <textarea
                                             className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none h-20 select-text cursor-text"
                                             defaultValue={siteSettings?.find(s => s.key === 'footer_subtitle')?.value || 'An homage to purity, material, and form.'}
                                             placeholder="Enter the footer subtitle..."
                                             onMouseDown={(e) => e.stopPropagation()}
-                                            onSelect={(e) => (e.target as HTMLElement).focus()}
                                             onBlur={(e) => updateSiteSetting('footer_subtitle', e.target.value)}
+                                          />
+                                      </div>
+
+                                      <div>
+                                          <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Footer Subtitle (Türkçe)</label>
+                                          <textarea
+                                            className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none h-20 select-text cursor-text"
+                                            defaultValue={siteSettings?.find(s => s.key === 'footer_subtitle_tr')?.value || ''}
+                                            onMouseDown={(e) => e.stopPropagation()}
+                                            onBlur={(e) => updateSiteSetting('footer_subtitle_tr', e.target.value)}
                                           />
                                       </div>
 
@@ -892,20 +1020,38 @@ export const Dashboard = () => {
                                             defaultValue={siteSettings?.find(s => s.key === 'ethos_title')?.value || 'THE ETHOS'}
                                             placeholder="e.g. THE ETHOS"
                                             onMouseDown={(e) => e.stopPropagation()}
-                                            onSelect={(e) => (e.target as HTMLElement).focus()}
                                             onBlur={(e) => updateSiteSetting('ethos_title', e.target.value)}
                                           />
                                       </div>
-                                      
+
+                                      <div>
+                                          <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Page Title (Türkçe)</label>
+                                          <input
+                                            className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none select-text cursor-text"
+                                            defaultValue={siteSettings?.find(s => s.key === 'ethos_title_tr')?.value || ''}
+                                            onMouseDown={(e) => e.stopPropagation()}
+                                            onBlur={(e) => updateSiteSetting('ethos_title_tr', e.target.value)}
+                                          />
+                                      </div>
+
                                       <div>
                                           <label className="text-[10px] uppercase font-bold text-stone-500 block mb-2">Description / Content</label>
-                                          <textarea 
+                                          <textarea
                                             className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none h-32 select-text cursor-text"
                                             defaultValue={siteSettings?.find(s => s.key === 'ethos_description')?.value || 'Our research leads us to discover new materials and old hands. We travel to find the rarest stones, the most resilient woods, and the metals that tell a story.'}
                                             placeholder="Enter the philosophy content..."
                                             onMouseDown={(e) => e.stopPropagation()}
-                                            onSelect={(e) => (e.target as HTMLElement).focus()}
                                             onBlur={(e) => updateSiteSetting('ethos_description', e.target.value)}
+                                          />
+                                      </div>
+
+                                      <div>
+                                          <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Description / Content (Türkçe)</label>
+                                          <textarea
+                                            className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none h-32 select-text cursor-text"
+                                            defaultValue={siteSettings?.find(s => s.key === 'ethos_description_tr')?.value || ''}
+                                            onMouseDown={(e) => e.stopPropagation()}
+                                            onBlur={(e) => updateSiteSetting('ethos_description_tr', e.target.value)}
                                           />
                                       </div>
                                   </div>
@@ -950,14 +1096,22 @@ export const Dashboard = () => {
                           <form onSubmit={submitCategory} className="space-y-6">
                               <div>
                                   <label className="text-[10px] uppercase font-bold text-stone-500 block mb-2">Category Name</label>
-                                  <input 
+                                  <input
                                     className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none"
-                                    value={catForm.name} onChange={e => setCatForm({...catForm, name: e.target.value})} required 
+                                    value={catForm.name} onChange={e => setCatForm({...catForm, name: e.target.value})} required
                                     onMouseDown={(e) => e.stopPropagation()}
-                                    onSelect={(e) => (e.target as HTMLElement).focus()}
                                   />
                               </div>
-                              
+
+                              <div>
+                                  <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Category Name (Türkçe)</label>
+                                  <input
+                                    className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none"
+                                    value={catForm.name_tr} onChange={e => setCatForm({...catForm, name_tr: e.target.value})}
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                  />
+                              </div>
+
                               <div>
                                   <label className="text-[10px] uppercase font-bold text-stone-500 block mb-2">Cover Image (Upload)</label>
                                   <div className="flex flex-col gap-2">
@@ -979,11 +1133,19 @@ export const Dashboard = () => {
 
                               <div>
                                   <label className="text-[10px] uppercase font-bold text-stone-500 block mb-2">Short Description</label>
-                                  <textarea 
+                                  <textarea
                                     className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none h-24"
                                     onMouseDown={(e) => e.stopPropagation()}
-                                    onSelect={(e) => (e.target as HTMLElement).focus()}
-                                    value={catForm.description} onChange={e => setCatForm({...catForm, description: e.target.value})} 
+                                    value={catForm.description} onChange={e => setCatForm({...catForm, description: e.target.value})}
+                                  />
+                              </div>
+
+                              <div>
+                                  <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Short Description (Türkçe)</label>
+                                  <textarea
+                                    className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none h-24"
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    value={catForm.description_tr} onChange={e => setCatForm({...catForm, description_tr: e.target.value})}
                                   />
                               </div>
                               <button disabled={isUploading} type="submit" className={`w-full font-bold uppercase py-3 text-xs tracking-widest transition-colors ${editingId ? 'bg-yellow-600 hover:bg-yellow-500 text-white' : 'bg-white hover:bg-stone-200 text-black'} disabled:opacity-50`}>
@@ -998,16 +1160,22 @@ export const Dashboard = () => {
                                     className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none"
                                     value={desForm.name} onChange={e => setDesForm({...desForm, name: e.target.value})} required 
                                     onMouseDown={(e) => e.stopPropagation()}
-                                    onSelect={(e) => (e.target as HTMLElement).focus()}
                                   />
                               </div>
                               <div>
                                   <label className="text-[10px] uppercase font-bold text-stone-500 block mb-2">Role</label>
-                                  <input 
+                                  <input
                                     className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none"
                                     value={desForm.role} onChange={e => setDesForm({...desForm, role: e.target.value})} required placeholder="e.g. Architect"
                                     onMouseDown={(e) => e.stopPropagation()}
-                                    onSelect={(e) => (e.target as HTMLElement).focus()}
+                                  />
+                              </div>
+                              <div>
+                                  <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Role (Türkçe)</label>
+                                  <input
+                                    className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none"
+                                    value={desForm.role_tr} onChange={e => setDesForm({...desForm, role_tr: e.target.value})} placeholder="ör. Mimar"
+                                    onMouseDown={(e) => e.stopPropagation()}
                                   />
                               </div>
                               <div>
@@ -1030,29 +1198,50 @@ export const Dashboard = () => {
                               </div>
                               <div>
                                   <label className="text-[10px] uppercase font-bold text-stone-500 block mb-2">Bio</label>
-                                  <textarea 
+                                  <textarea
                                     className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none h-32"
                                     onMouseDown={(e) => e.stopPropagation()}
-                                    onSelect={(e) => (e.target as HTMLElement).focus()}
-                                    value={desForm.bio} onChange={e => setDesForm({...desForm, bio: e.target.value})} 
+                                    value={desForm.bio} onChange={e => setDesForm({...desForm, bio: e.target.value})}
+                                  />
+                              </div>
+                              <div>
+                                  <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Bio (Türkçe)</label>
+                                  <textarea
+                                    className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none h-32"
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    value={desForm.bio_tr} onChange={e => setDesForm({...desForm, bio_tr: e.target.value})}
                                   />
                               </div>
                               <div>
                                   <label className="text-[10px] uppercase font-bold text-stone-500 block mb-2">Collections (Comma sep.)</label>
-                                  <input 
+                                  <input
                                     className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none"
                                     value={desForm.collections} onChange={e => setDesForm({...desForm, collections: e.target.value})} placeholder="LuminArt, Pietra..."
                                     onMouseDown={(e) => e.stopPropagation()}
-                                    onSelect={(e) => (e.target as HTMLElement).focus()}
+                                  />
+                              </div>
+                              <div>
+                                  <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Collections (Türkçe, virgülle ayır)</label>
+                                  <input
+                                    className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none"
+                                    value={desForm.collections_tr} onChange={e => setDesForm({...desForm, collections_tr: e.target.value})} placeholder="LuminArt, Pietra..."
+                                    onMouseDown={(e) => e.stopPropagation()}
                                   />
                               </div>
                               <div>
                                   <label className="text-[10px] uppercase font-bold text-stone-500 block mb-2">Quote</label>
-                                  <textarea 
+                                  <textarea
                                     className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none h-20"
                                     onMouseDown={(e) => e.stopPropagation()}
-                                    onSelect={(e) => (e.target as HTMLElement).focus()}
-                                    value={desForm.quote} onChange={e => setDesForm({...desForm, quote: e.target.value})} 
+                                    value={desForm.quote} onChange={e => setDesForm({...desForm, quote: e.target.value})}
+                                  />
+                              </div>
+                              <div>
+                                  <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Quote (Türkçe)</label>
+                                  <textarea
+                                    className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none h-20"
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    value={desForm.quote_tr} onChange={e => setDesForm({...desForm, quote_tr: e.target.value})}
                                   />
                               </div>
                               <button disabled={isUploading} type="submit" className={`w-full font-bold uppercase py-3 text-xs tracking-widest transition-colors ${editingId ? 'bg-yellow-600 hover:bg-yellow-500 text-white' : 'bg-white hover:bg-stone-200 text-black'} disabled:opacity-50`}>
@@ -1075,7 +1264,14 @@ export const Dashboard = () => {
                               <div>
                                   <label className="text-[10px] uppercase font-bold text-stone-500 block mb-2">Product Name</label>
                                   <input className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none"
-                                    value={prodForm.name} onChange={e => setProdForm({...prodForm, name: e.target.value})} required onMouseDown={(e) => e.stopPropagation()} onSelect={(e) => (e.target as HTMLElement).focus()} />
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    value={prodForm.name} onChange={e => setProdForm({...prodForm, name: e.target.value})} />
+                              </div>
+                              <div>
+                                  <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Product Name (Türkçe)</label>
+                                  <input className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none"
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    value={prodForm.name_tr} onChange={e => setProdForm({...prodForm, name_tr: e.target.value})} />
                               </div>
 
                               <div>
@@ -1100,14 +1296,20 @@ export const Dashboard = () => {
                                <div>
                                   <label className="text-[10px] uppercase font-bold text-stone-500 block mb-2">Designer</label>
                                   <input className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none"
-                                    value={prodForm.designer} onChange={e => setProdForm({...prodForm, designer: e.target.value})} placeholder="e.g. Alper Akkoz" onMouseDown={(e) => e.stopPropagation()} onSelect={(e) => (e.target as HTMLElement).focus()} />
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    value={prodForm.designer} onChange={e => setProdForm({...prodForm, designer: e.target.value})} />
                               </div>
                               <div>
                                   <label className="text-[10px] uppercase font-bold text-stone-500 block mb-2">Description</label>
                                   <textarea className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none h-20"
                                     onMouseDown={(e) => e.stopPropagation()}
-                                    onSelect={(e) => (e.target as HTMLElement).focus()}
                                     value={prodForm.description} onChange={e => setProdForm({...prodForm, description: e.target.value})} />
+                              </div>
+                              <div>
+                                  <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Description (Türkçe)</label>
+                                  <textarea className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none h-20"
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    value={prodForm.description_tr} onChange={e => setProdForm({...prodForm, description_tr: e.target.value})} />
                               </div>
 
                               <div>
@@ -1115,20 +1317,39 @@ export const Dashboard = () => {
                                   <textarea className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none h-32 select-text cursor-text"
                                     placeholder="Additional details, technical specs, or rich text info..."
                                     onMouseDown={(e) => e.stopPropagation()}
-                                    onSelect={(e) => (e.target as HTMLElement).focus()}
                                     value={prodForm.more_info} onChange={e => setProdForm({...prodForm, more_info: e.target.value})} />
                               </div>
-                              
+                              <div>
+                                  <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">More Info (Türkçe, opsiyonel)</label>
+                                  <textarea className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-sm focus:border-white outline-none h-32 select-text cursor-text"
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    value={prodForm.more_info_tr} onChange={e => setProdForm({...prodForm, more_info_tr: e.target.value})} />
+                              </div>
+
                               <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="text-[10px] uppercase font-bold text-stone-500 block mb-2">Dimensions (Comma sep.)</label>
                                     <input className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-xs focus:border-white outline-none"
-                                        value={prodForm.dimensions} onChange={e => setProdForm({...prodForm, dimensions: e.target.value})} placeholder="10x10cm, 20x20cm" onMouseDown={(e) => e.stopPropagation()} onSelect={(e) => (e.target as HTMLElement).focus()} />
+                                      onMouseDown={(e) => e.stopPropagation()}
+                                      value={prodForm.dimensions} onChange={e => setProdForm({...prodForm, dimensions: e.target.value})} />
                                 </div>
                                 <div>
                                     <label className="text-[10px] uppercase font-bold text-stone-500 block mb-2">Details (Comma sep.)</label>
                                     <input className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-xs focus:border-white outline-none"
-                                        value={prodForm.details} onChange={e => setProdForm({...prodForm, details: e.target.value})} placeholder="Brass, Stone, LED..." onMouseDown={(e) => e.stopPropagation()} onSelect={(e) => (e.target as HTMLElement).focus()} />
+                                      onMouseDown={(e) => e.stopPropagation()}
+                                      value={prodForm.details} onChange={e => setProdForm({...prodForm, details: e.target.value})} />
+                                </div>
+                                <div>
+                                    <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Dimensions (Türkçe)</label>
+                                    <input className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-xs focus:border-white outline-none"
+                                      onMouseDown={(e) => e.stopPropagation()}
+                                      value={prodForm.dimensions_tr} onChange={e => setProdForm({...prodForm, dimensions_tr: e.target.value})} />
+                                </div>
+                                <div>
+                                    <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Details (Türkçe)</label>
+                                    <input className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-xs focus:border-white outline-none"
+                                      onMouseDown={(e) => e.stopPropagation()}
+                                      value={prodForm.details_tr} onChange={e => setProdForm({...prodForm, details_tr: e.target.value})} />
                                 </div>
                               </div>
 
@@ -1172,7 +1393,14 @@ export const Dashboard = () => {
                               <div>
                                 <label className="text-[10px] uppercase font-bold text-stone-500 block mb-2">Light Source (Comma sep.)</label>
                                 <input className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-xs focus:border-white outline-none"
-                                    value={prodForm.lightSource} onChange={e => setProdForm({...prodForm, lightSource: e.target.value})} placeholder="3000K, Dimmable..." onMouseDown={(e) => e.stopPropagation()} onSelect={(e) => (e.target as HTMLElement).focus()} />
+                                  onMouseDown={(e) => e.stopPropagation()}
+                                  value={prodForm.lightSource} onChange={e => setProdForm({...prodForm, lightSource: e.target.value})} />
+                              </div>
+                              <div>
+                                <label className="text-[10px] uppercase font-bold text-yellow-600 block mb-2">Light Source (Türkçe)</label>
+                                <input className="w-full bg-[#0a0a0a] border border-stone-700 p-3 text-white text-xs focus:border-white outline-none"
+                                  onMouseDown={(e) => e.stopPropagation()}
+                                  value={prodForm.lightSource_tr} onChange={e => setProdForm({...prodForm, lightSource_tr: e.target.value})} />
                               </div>
 
                               <button disabled={isUploading} type="submit" className={`w-full font-bold uppercase py-3 text-xs tracking-widest transition-colors ${editingId ? 'bg-yellow-600 hover:bg-yellow-500 text-white' : 'bg-white hover:bg-stone-200 text-black'} disabled:opacity-50`}>

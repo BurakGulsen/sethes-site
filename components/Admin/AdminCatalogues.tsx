@@ -10,6 +10,7 @@ export const AdminCatalogues: React.FC = () => {
   
   // Form State
   const [title, setTitle] = useState('');
+  const [titleTr, setTitleTr] = useState('');
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
 
@@ -68,6 +69,7 @@ export const AdminCatalogues: React.FC = () => {
             .from('catalogues')
             .insert([{
                 title,
+                title_tr: titleTr || null,
                 cover_image: coverUrl,
                 pdf_url: pdfUrl
             }]);
@@ -76,6 +78,7 @@ export const AdminCatalogues: React.FC = () => {
 
         // Reset Form
         setTitle('');
+        setTitleTr('');
         setCoverFile(null);
         setPdfFile(null);
         fetchCatalogues();
@@ -119,13 +122,24 @@ export const AdminCatalogues: React.FC = () => {
         <form onSubmit={handleUpload} className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-wider text-stone-500">Title</label>
-                <input 
-                    type="text" 
+                <input
+                    type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     onMouseDown={(e) => e.stopPropagation()}
                     className="w-full p-3 bg-black border border-stone-800 text-white rounded-lg focus:border-white outline-none"
                     placeholder="e.g. S34/4 Collection"
+                />
+            </div>
+
+            <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-wider text-yellow-600">Title (Türkçe)</label>
+                <input
+                    type="text"
+                    value={titleTr}
+                    onChange={(e) => setTitleTr(e.target.value)}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    className="w-full p-3 bg-black border border-stone-800 text-white rounded-lg focus:border-white outline-none"
                 />
             </div>
 

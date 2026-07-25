@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { MediaCategory, MediaItem } from '../../types';
-import { Trash2, Upload, FileText, Plus, FolderPlus, Folder, BookOpen } from 'lucide-react';
+import { Trash2, Upload, FileText, Plus, FolderPlus, Folder, BookOpen, Newspaper } from 'lucide-react';
 import { AdminCatalogues } from './AdminCatalogues';
+import { AdminNews } from './AdminNews';
 
 export const AdminMedia: React.FC = () => {
   const [categories, setCategories] = useState<MediaCategory[]>([]);
@@ -13,9 +14,11 @@ export const AdminMedia: React.FC = () => {
   
   // Category Form State
   const [newCatName, setNewCatName] = useState('');
+  const [newCatNameTr, setNewCatNameTr] = useState('');
 
   // Item Form State
   const [title, setTitle] = useState('');
+  const [titleTr, setTitleTr] = useState('');
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
 
@@ -24,7 +27,7 @@ export const AdminMedia: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedCategory && selectedCategory !== 'STATIC_CATALOGUES') {
+    if (selectedCategory && selectedCategory !== 'STATIC_CATALOGUES' && selectedCategory !== 'STATIC_NEWS') {
       fetchItems(selectedCategory);
     } else {
       setItems([]);
@@ -74,11 +77,12 @@ export const AdminMedia: React.FC = () => {
           const slug = newCatName.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
           const { error } = await supabase
             .from('media_categories')
-            .insert([{ name: newCatName, slug }]);
-          
+            .insert([{ name: newCatName, name_tr: newCatNameTr || null, slug }]);
+
           if (error) throw error;
-          
+
           setNewCatName('');
+          setNewCatNameTr('');
           fetchCategories();
       } catch (error: any) {
           console.error('Error adding category:', error);
@@ -136,6 +140,7 @@ export const AdminMedia: React.FC = () => {
             .insert([{
                 category_id: selectedCategory,
                 title,
+                title_tr: titleTr || null,
                 cover_image: coverUrl,
                 pdf_url: pdfUrl || null
             }]);
@@ -144,6 +149,7 @@ export const AdminMedia: React.FC = () => {
 
         // Reset Form
         setTitle('');
+        setTitleTr('');
         setCoverFile(null);
         setPdfFile(null);
         fetchItems(selectedCategory);
@@ -183,11 +189,18 @@ export const AdminMedia: React.FC = () => {
                   
                   <div className="space-y-2 mb-6">
                       {/* Static Catalogues Item */}
-                      <div 
+                      <div
                         onClick={() => setSelectedCategory('STATIC_CATALOGUES')}
                         className={`p-3 rounded-lg cursor-pointer flex justify-between items-center group transition-colors ${selectedCategory === 'STATIC_CATALOGUES' ? 'bg-stone-800 text-white' : 'hover:bg-stone-900 text-stone-400'}`}
                       >
                           <span className="font-medium text-sm flex items-center gap-2"><BookOpen size={14} /> Catalogues</span>
+                      </div>
+
+                      <div
+                        onClick={() => setSelectedCategory('STATIC_NEWS')}
+                        className={`p-3 rounded-lg cursor-pointer flex justify-between items-center group transition-colors ${selectedCategory === 'STATIC_NEWS' ? 'bg-stone-800 text-white' : 'hover:bg-stone-900 text-stone-400'}`}
+                      >
+                          <span className="font-medium text-sm flex items-center gap-2"><Newspaper size={14} /> Haberler</span>
                       </div>
 
                       {categories.map(cat => (
@@ -207,16 +220,24 @@ export const AdminMedia: React.FC = () => {
                       ))}
                   </div>
 
-                  <form onSubmit={handleAddCategory} className="flex gap-2">
-                      <input 
-                        type="text" 
+                  <form onSubmit={handleAddCategory} className="space-y-2">
+                      <input
+                        type="text"
                         value={newCatName}
                         onChange={(e) => setNewCatName(e.target.value)}
                         onMouseDown={(e) => e.stopPropagation()}
                         placeholder="New Category..."
-                        className="flex-1 bg-black border border-stone-800 rounded p-2 text-xs text-white focus:border-stone-600 outline-none"
+                        className="w-full bg-black border border-stone-800 rounded p-2 text-xs text-white focus:border-stone-600 outline-none"
                       />
-                      <button type="submit" className="bg-white text-black p-2 rounded hover:bg-stone-200">
+                      <input
+                        type="text"
+                        value={newCatNameTr}
+                        onChange={(e) => setNewCatNameTr(e.target.value)}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        placeholder="Yeni Kategori (Türkçe)..."
+                        className="w-full bg-black border border-stone-800 rounded p-2 text-xs text-white focus:border-yellow-600 outline-none"
+                      />
+                      <button type="submit" className="w-full bg-white text-black p-2 rounded hover:bg-stone-200 flex items-center justify-center">
                           <Plus size={16} />
                       </button>
                   </form>
@@ -229,6 +250,8 @@ export const AdminMedia: React.FC = () => {
                   <div className="bg-[#151515] p-8 rounded-xl border border-stone-800">
                       <AdminCatalogues />
                   </div>
+              ) : selectedCategory === 'STATIC_NEWS' ? (
+                  <AdminNews />
               ) : selectedCategory ? (
                   <>
                     {/* Upload Form */}
@@ -239,13 +262,24 @@ export const AdminMedia: React.FC = () => {
                         <form onSubmit={handleUploadItem} className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             <div className="space-y-2">
                                 <label className="text-xs font-bold uppercase tracking-wider text-stone-500">Title</label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
                                     onMouseDown={(e) => e.stopPropagation()}
                                     className="w-full p-3 bg-black border border-stone-800 text-white rounded-lg focus:border-white outline-none"
                                     placeholder="e.g. Press Release 2024"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold uppercase tracking-wider text-yellow-600">Title (Türkçe)</label>
+                                <input
+                                    type="text"
+                                    value={titleTr}
+                                    onChange={(e) => setTitleTr(e.target.value)}
+                                    onMouseDown={(e) => e.stopPropagation()}
+                                    className="w-full p-3 bg-black border border-stone-800 text-white rounded-lg focus:border-white outline-none"
                                 />
                             </div>
 

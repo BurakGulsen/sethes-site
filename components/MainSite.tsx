@@ -2,28 +2,29 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Product, MediaCategory } from '../types';
 import { Navigation } from './Navigation';
-import { AiConcierge } from './AiConcierge';
 import { RevealOnScroll } from './RevealOnScroll';
-import { Menu, Search, Sparkles, Instagram, Mail, MapPin, WifiOff, Linkedin, Youtube, Twitter, Facebook, Globe } from 'lucide-react';
-import { useSiteData } from '../context/SiteContext';
+import { Menu, Search, Instagram, Mail, MapPin, WifiOff, Linkedin, Youtube, Twitter, Facebook, Globe } from 'lucide-react';
+import { useLocalizedSiteData } from '../context/SiteContext';
+import { useLanguage } from '../context/LanguageContext';
+import { DARK_THEME_CATEGORY_SLUGS } from '../lib/constants';
 import { SearchOverlay } from './SearchOverlay';
 import { Intro } from './Intro';
 
 export const MainSite: React.FC = () => {
   const [showIntro, setShowIntro] = useState(true);
   const [isNavOpen, setIsNavOpen] = useState(false);
-  const [isAiOpen, setIsAiOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  
-  const { siteSettings, error, categories } = useSiteData();
+
+  const { siteSettings, getSetting, error, categories } = useLocalizedSiteData();
+  const { t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
 
   // Footer Data Logic
-  const footerTitle = siteSettings?.find(s => s.key === 'footer_title')?.value || 'ARBEM ATELIER';
-  const footerSubtitle = siteSettings?.find(s => s.key === 'footer_subtitle')?.value || 'An homage to purity, material, and form.';
-  
+  const footerTitle = getSetting('footer_title') || 'SETHES ATELIER';
+  const footerSubtitle = getSetting('footer_subtitle') || 'An homage to purity, material, and form.';
+
   let socialLinks: {platform: string, url: string}[] = [];
   try {
       const socialStr = siteSettings?.find(s => s.key === 'social_links')?.value;
@@ -77,16 +78,16 @@ export const MainSite: React.FC = () => {
          <div className="bg-white p-12 shadow-2xl max-w-lg border-t-4 border-red-500">
              <WifiOff size={48} className="text-stone-300 mx-auto mb-6" />
              <h2 className="text-2xl font-condensed font-bold text-stone-900 uppercase mb-4 tracking-wide">
-               Bağlantı Kurulamadı
+               {t('mainSite.connectionErrorTitle')}
              </h2>
              <p className="text-stone-600 font-light mb-8">
                {error}
              </p>
-             <button 
+             <button
                onClick={() => window.location.reload()}
                className="bg-black text-white px-8 py-3 text-xs font-bold tracking-[0.2em] uppercase hover:bg-stone-800 transition-colors"
              >
-               Tekrar Dene
+               {t('mainSite.tryAgain')}
              </button>
          </div>
       </div>
@@ -99,15 +100,16 @@ export const MainSite: React.FC = () => {
   const isDarkPage = 
     location.pathname.includes('/product/') || 
     location.pathname.includes('/catalogues') || 
-    location.pathname.includes('/media/') || 
-    location.pathname.includes('/contacts') || 
+    location.pathname.includes('/media/') ||
+    location.pathname.includes('/materials') ||
+    location.pathname.includes('/contacts') ||
     location.pathname.includes('/collections') ||
     (location.pathname.includes('/category/') && (() => {
         // Check if current category is dark
         const pathParts = location.pathname.split('/');
         const catId = pathParts[pathParts.length - 1];
         const cat = categories.find(c => c.id === catId || c.slug === catId);
-        return cat && ['Lighting', 'Washbasins'].includes(cat.name);
+        return cat && DARK_THEME_CATEGORY_SLUGS.includes(cat.slug);
     })());
 
   const globalBgClass = isDarkPage ? 'bg-[#121212] text-white' : 'bg-[#f4f4f4] text-[#171719]';
@@ -123,14 +125,14 @@ export const MainSite: React.FC = () => {
           }`}
         >
           <div onClick={() => navigate('/')} className="cursor-pointer font-sans text-xl tracking-[0.2em] font-bold text-white uppercase flex items-center h-20">
-            {siteSettings?.find(s => s.key === 'logo_type')?.value === 'image' && siteSettings?.find(s => s.key === 'logo_image_url')?.value ? (
-                <img 
-                    src={siteSettings.find(s => s.key === 'logo_image_url')?.value} 
-                    alt="Logo" 
+            {getSetting('logo_type') === 'image' && getSetting('logo_image_url') ? (
+                <img
+                    src={getSetting('logo_image_url')}
+                    alt="Logo"
                     className="h-full w-auto object-contain py-1"
                 />
             ) : (
-                siteSettings?.find(s => s.key === 'logo_text')?.value || 'ARBEM'
+                getSetting('logo_text') || 'SETHES'
             )}
           </div>
 
@@ -156,7 +158,7 @@ export const MainSite: React.FC = () => {
                 </div>
                 <div className="flex gap-12 text-sm tracking-widest uppercase">
                   <div className="flex flex-col gap-4">
-                    <span className="text-white font-bold mb-2">Connect</span>
+                    <span className="text-white font-bold mb-2">{t('mainSite.connect')}</span>
                     {socialLinks.map((link, idx) => (
                         <a key={idx} href={link.url} target="_blank" rel="noopener noreferrer" className="hover:text-white flex items-center gap-2 transition-colors">
                             {getSocialIcon(link.platform)} {link.platform}
@@ -168,23 +170,16 @@ export const MainSite: React.FC = () => {
             </footer>
           </RevealOnScroll>
         )}
-
-        <button onClick={() => setIsAiOpen(true)} className="fixed bottom-8 right-8 z-40 bg-black text-white p-3 rounded-full hover:bg-stone-900 transition-colors shadow-lg border border-stone-800">
-          <Sparkles size={20} strokeWidth={1} />
-        </button>
       </div>
 
-      <Navigation 
-        isOpen={isNavOpen} 
-        onClose={() => setIsNavOpen(false)} 
-        onOpenAi={() => { setIsNavOpen(false); setIsAiOpen(true); }}
+      <Navigation
+        isOpen={isNavOpen}
+        onClose={() => setIsNavOpen(false)}
         onCategorySelect={handleCategorySelect}
         onMediaSelect={handleMediaSelect}
       />
-      
-      <AiConcierge isOpen={isAiOpen} onClose={() => setIsAiOpen(false)} />
-      
-      <SearchOverlay 
+
+      <SearchOverlay
         isOpen={isSearchOpen} 
         onClose={() => setIsSearchOpen(false)}
         onProductClick={handleProductClick}

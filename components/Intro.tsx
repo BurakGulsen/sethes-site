@@ -31,7 +31,7 @@ export const Intro: React.FC<IntroProps> = ({ onComplete }) => {
         
         {/* Marka İsmi - Henge Tarzı Geniş Harf Aralığı */}
         <h1 className="text-white text-2xl md:text-3xl font-sans font-bold tracking-[0.8em] uppercase mb-4 pl-[0.8em]">
-          ARBEM
+          SETHES
         </h1>
         
         {/* Alt Çizgi */}

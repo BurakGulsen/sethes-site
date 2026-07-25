@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabaseClient';
 import { MediaItem, MediaCategory } from '../types';
 import { motion } from 'framer-motion';
 import { Download, FileText } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface MediaGalleryProps {
   category: MediaCategory;
@@ -11,6 +12,7 @@ interface MediaGalleryProps {
 export const MediaGallery: React.FC<MediaGalleryProps> = ({ category }) => {
   const [items, setItems] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { language, t } = useLanguage();
 
   useEffect(() => {
     fetchItems();
@@ -56,10 +58,10 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({ category }) => {
 
         {loading ? (
           <div className="flex justify-center items-center h-64">
-            <div className="animate-pulse text-stone-500 tracking-widest uppercase">Loading...</div>
+            <div className="animate-pulse text-stone-500 tracking-widest uppercase">{t('mediaGallery.loading')}</div>
           </div>
         ) : items.length === 0 ? (
-          <div className="text-stone-500 text-lg font-light">No items available in this category.</div>
+          <div className="text-stone-500 text-lg font-light">{t('mediaGallery.empty')}</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
             {items.map((item, index) => (
@@ -73,9 +75,9 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({ category }) => {
               >
                 <div className="relative aspect-square bg-stone-900 overflow-hidden mb-6">
                   {item.cover_image ? (
-                    <img 
-                      src={item.cover_image} 
-                      alt={item.title}
+                    <img
+                      src={item.cover_image}
+                      alt={language === 'tr' && item.title_tr ? item.title_tr : item.title}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                   ) : (
@@ -83,7 +85,7 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({ category }) => {
                       <FileText size={64} strokeWidth={1} />
                     </div>
                   )}
-                  
+
                   {item.pdf_url && (
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
                         <div className="bg-white/10 backdrop-blur-md p-4 rounded-full">
@@ -92,13 +94,13 @@ export const MediaGallery: React.FC<MediaGalleryProps> = ({ category }) => {
                       </div>
                   )}
                 </div>
-                
+
                 <h3 className="text-2xl font-condensed uppercase tracking-wide mb-2 group-hover:text-stone-300 transition-colors">
-                  {item.title}
+                  {language === 'tr' && item.title_tr ? item.title_tr : item.title}
                 </h3>
                 {item.pdf_url && (
                     <button className="text-xs font-bold tracking-[0.2em] uppercase text-stone-500 group-hover:text-white transition-colors flex items-center gap-2">
-                    Download <span className="text-[10px] opacity-50">PDF</span>
+                    {t('mediaGallery.download')} <span className="text-[10px] opacity-50">{t('mediaGallery.pdf')}</span>
                     </button>
                 )}
               </motion.div>

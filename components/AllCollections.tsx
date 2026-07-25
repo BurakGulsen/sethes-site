@@ -1,5 +1,6 @@
 import React from 'react';
-import { useSiteData } from '../context/SiteContext';
+import { useLocalizedSiteData } from '../context/SiteContext';
+import { useLanguage } from '../context/LanguageContext';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 
@@ -8,7 +9,8 @@ interface AllCollectionsProps {
 }
 
 export const AllCollections: React.FC<AllCollectionsProps> = ({ onCategoryClick }) => {
-  const { categories } = useSiteData();
+  const { categories } = useLocalizedSiteData();
+  const { t } = useLanguage();
 
   return (
     <div className="pt-32 min-h-screen bg-[#121212] px-4 md:px-10 pb-20">
@@ -19,7 +21,7 @@ export const AllCollections: React.FC<AllCollectionsProps> = ({ onCategoryClick 
         className="mb-16 border-b border-white/10 pb-8"
       >
         <h1 className="text-6xl md:text-8xl font-condensed uppercase tracking-tight text-white">
-          All Collections
+          {t('allCollections.title')}
         </h1>
       </motion.div>
 
@@ -41,7 +43,7 @@ export const AllCollections: React.FC<AllCollectionsProps> = ({ onCategoryClick 
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex flex-col justify-end p-8">
               <h3 className="text-white text-3xl md:text-4xl font-condensed uppercase">{cat.name}</h3>
               <p className="text-white/80 text-sm mt-2 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-4 group-hover:translate-y-0 duration-500 flex items-center gap-2">
-                Explore Collection <ArrowRight size={14} />
+                {t('allCollections.exploreCollection')} <ArrowRight size={14} />
               </p>
             </div>
           </motion.div>

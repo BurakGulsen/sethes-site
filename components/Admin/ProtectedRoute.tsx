@@ -23,8 +23,10 @@ export const ProtectedRoute = () => {
 
   if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-white font-condensed tracking-widest">AUTHENTICATING...</div>;
 
-  // Security by Obscurity: Redirect to home silently if not authenticated
-  if (!session) {
+  // Redirect to home silently if not authenticated OR not an admin —
+  // required now that ordinary visitors can also self-register and hold an
+  // authenticated Supabase session (see AccountRegister.tsx, role: 'customer').
+  if (!session || session.user?.user_metadata?.role !== 'admin') {
       return <Navigate to="/" replace />;
   }
 

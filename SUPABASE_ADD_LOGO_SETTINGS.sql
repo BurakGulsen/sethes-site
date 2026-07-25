@@ -4,6 +4,6 @@
 INSERT INTO site_settings (key, value)
 VALUES 
   ('logo_type', 'text'),
-  ('logo_text', 'ARBEM'),
+  ('logo_text', 'SETHES'),
   ('logo_image_url', '')
 ON CONFLICT (key) DO NOTHING;

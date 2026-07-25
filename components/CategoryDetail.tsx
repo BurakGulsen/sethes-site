@@ -1,5 +1,7 @@
 import React from 'react';
 import { Product, Category } from '../types';
+import { useLanguage } from '../context/LanguageContext';
+import { DARK_THEME_CATEGORY_SLUGS } from '../lib/constants';
 
 interface CategoryDetailProps {
   categoryData: Category;
@@ -8,11 +10,12 @@ interface CategoryDetailProps {
 }
 
 export const CategoryDetail: React.FC<CategoryDetailProps> = ({ categoryData, products, onProductClick }) => {
+  const { t } = useLanguage();
   const categoryName = categoryData.name;
-  
-  // Dynamic theme based on category logic or description
-  // Assuming 'Dark' theme for specific categories for visual consistency
-  const isDark = ['Lighting', 'Washbasins', 'Cabinets', 'Tables'].includes(categoryName);
+
+  // Dynamic theme based on category — keyed by slug (stable across languages),
+  // not the display name (which changes with the active language).
+  const isDark = DARK_THEME_CATEGORY_SLUGS.includes(categoryData.slug);
   const bgColor = isDark ? 'bg-[#121212]' : 'bg-[#f4f4f4]';
   const textColor = isDark ? 'text-white' : 'text-[#171719]';
   const breadcrumbColor = isDark ? 'text-white' : 'text-stone-500';
@@ -25,7 +28,7 @@ export const CategoryDetail: React.FC<CategoryDetailProps> = ({ categoryData, pr
         
         <div className="mb-16">
           <div className={`flex gap-2 text-[11px] font-bold tracking-[0.15em] uppercase ${breadcrumbColor} mb-4 pl-1`}>
-            <span className="hover:opacity-70 cursor-pointer transition-opacity">Products</span>
+            <span className="hover:opacity-70 cursor-pointer transition-opacity">{t('categoryDetail.breadcrumb')}</span>
             <span>/</span>
             <span className={isDark ? 'text-white' : 'text-black'}>{categoryName}</span>
           </div>
@@ -69,7 +72,7 @@ export const CategoryDetail: React.FC<CategoryDetailProps> = ({ categoryData, pr
             </div>
           ))}
           {products.length === 0 && (
-             <div className="col-span-full py-20 text-center opacity-50">No products in this category yet.</div>
+             <div className="col-span-full py-20 text-center opacity-50">{t('categoryDetail.empty')}</div>
           )}
         </div>
       </div>

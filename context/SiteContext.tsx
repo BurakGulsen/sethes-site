@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
-import { Product, Category, SiteSettings, Designer, MediaCategory, ContactInfo } from '../types';
+import { Product, Category, SiteSettings, Designer, MediaCategory, ContactInfo, MaterialCategory } from '../types';
+import { useLanguage } from './LanguageContext';
 
 interface SiteContextType {
   products: Product[];
@@ -8,6 +9,7 @@ interface SiteContextType {
   siteSettings: SiteSettings[];
   designers: Designer[];
   mediaCategories: MediaCategory[];
+  materialCategories: MaterialCategory[];
   contacts: ContactInfo[];
   isLoading: boolean;
   error: string | null;
@@ -22,6 +24,7 @@ interface SiteContextType {
   updateDesigner: (id: string, updates: Partial<Designer>) => Promise<void>;
   deleteDesigner: (id: string) => Promise<void>;
   uploadFile: (file: File, path: string) => Promise<string | null>;
+  uploadPrivateFile: (file: File, path: string) => Promise<string | null>;
   updateSiteSetting: (key: string, value: string) => Promise<void>;
   updateContact: (id: string, updates: Partial<ContactInfo>) => Promise<void>;
   addContact: (contact: Omit<ContactInfo, 'id'>) => Promise<void>;
@@ -53,6 +56,7 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [siteSettings, setSiteSettings] = useState<SiteSettings[]>([]);
   const [designers, setDesigners] = useState<Designer[]>([]);
   const [mediaCategories, setMediaCategories] = useState<MediaCategory[]>([]);
+  const [materialCategories, setMaterialCategories] = useState<MaterialCategory[]>([]);
   const [contacts, setContacts] = useState<ContactInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -127,6 +131,16 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.error("Contacts fetch error:", contactsError);
       }
 
+      // 7. Fetch Material Categories
+      const { data: materialCatData, error: materialCatError } = await supabase
+        .from('material_categories')
+        .select('*')
+        .order('sort_order', { ascending: true });
+
+      if (materialCatError) {
+          console.error("Material Categories fetch error:", materialCatError);
+      }
+
       // Handle Categories
       if (catData && catData.length > 0) {
         setCategories(catData);
@@ -148,7 +162,7 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 id: item.id,
                 category_id: item.category_id,
                 name: item.name,
-                category: item.category || 'General', 
+                category: item.category || 'General',
                 image: item.image,
                 description: item.description,
                 designer: designerName,
@@ -160,7 +174,14 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 lightSource: Array.isArray(item.light_source) ? item.light_source : [],
                 notes: Array.isArray(item.notes) ? item.notes : [],
                 dimensions: Array.isArray(item.dimensions) ? item.dimensions : [],
-                more_info: item.more_info
+                more_info: item.more_info,
+                // Turkish counterparts — passed through untouched, resolved later by useLocalizedSiteData()
+                name_tr: item.name_tr,
+                description_tr: item.description_tr,
+                details_tr: Array.isArray(item.details_tr) ? item.details_tr : undefined,
+                lightSource_tr: Array.isArray(item.light_source_tr) ? item.light_source_tr : undefined,
+                dimensions_tr: Array.isArray(item.dimensions_tr) ? item.dimensions_tr : undefined,
+                more_info_tr: item.more_info_tr
             };
         });
         setProducts(mappedData);
@@ -188,6 +209,11 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setContacts(contactsData);
       }
 
+      // Handle Material Categories
+      if (materialCatData) {
+          setMaterialCategories(materialCatData);
+      }
+
     } catch (err: any) {
       console.error("SiteContext Critical Error:", err);
       // More user friendly message if it's a connection error
@@ -210,6 +236,24 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (uploadError) throw uploadError;
       const { data } = supabase.storage.from('product-assets').getPublicUrl(filePath);
       return data.publicUrl;
+    } catch (error: any) {
+      console.error('Upload Error:', error.message);
+      alert('Dosya yüklenirken hata oluştu: ' + error.message);
+      return null;
+    }
+  };
+
+  // Uploads to the private 'technical-docs' bucket and returns the raw
+  // storage path (not a public URL — the bucket has no public access,
+  // downloads require a signed URL generated for an authenticated session).
+  const uploadPrivateFile = async (file: File, path: string): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+      const filePath = `${path}/${fileName}`;
+      const { error: uploadError } = await supabase.storage.from('technical-docs').upload(filePath, file);
+      if (uploadError) throw uploadError;
+      return filePath;
     } catch (error: any) {
       console.error('Upload Error:', error.message);
       alert('Dosya yüklenirken hata oluştu: ' + error.message);
@@ -268,7 +312,13 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
             light_source: product.lightSource,
             notes: product.notes,
             dimensions: product.dimensions,
-            more_info: product.more_info
+            more_info: product.more_info,
+            name_tr: product.name_tr,
+            description_tr: product.description_tr,
+            details_tr: product.details_tr,
+            light_source_tr: product.lightSource_tr,
+            dimensions_tr: product.dimensions_tr,
+            more_info_tr: product.more_info_tr
         };
         const { error } = await supabase.from('products').insert([dbProduct]);
         if (error) throw error;
@@ -286,6 +336,12 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         if ('lightSource' in dbUpdates) {
             delete dbUpdates.lightSource;
+        }
+        if (updates.lightSource_tr !== undefined) {
+             dbUpdates.light_source_tr = updates.lightSource_tr;
+        }
+        if ('lightSource_tr' in dbUpdates) {
+            delete dbUpdates.lightSource_tr;
         }
         const { error } = await supabase.from('products').update(dbUpdates).eq('id', id);
         if (error) throw error;
@@ -393,8 +449,9 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
         siteSettings,
         designers,
         mediaCategories,
+        materialCategories,
         contacts,
-        isLoading, 
+        isLoading,
         error,
         refreshData: fetchData, 
         updateProduct,
@@ -407,6 +464,7 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateDesigner,
         deleteDesigner,
         uploadFile,
+        uploadPrivateFile,
         updateSiteSetting,
         updateContact,
         addContact,
@@ -423,4 +481,99 @@ export const useSiteData = () => {
     throw new Error('useSiteData must be used within a SiteProvider');
   }
   return context;
+};
+
+// Resolves every _tr sibling field down to a single active-language value —
+// the shape of every returned object matches today's (English-only) shape
+// exactly, so public/presentational components need zero changes beyond
+// swapping useSiteData() for useLocalizedSiteData(). Admin components must
+// keep using the raw useSiteData() above so they can edit BOTH languages
+// regardless of which one is currently toggled on the public site.
+const pick = (base?: string, tr?: string): string | undefined =>
+  (tr && tr.trim() ? tr : base);
+
+const pickArr = (base?: string[], tr?: string[]): string[] | undefined =>
+  (tr && tr.length > 0 ? tr : base);
+
+export const useLocalizedSiteData = () => {
+  const { products, categories, designers, mediaCategories, materialCategories, contacts, siteSettings, ...rest } = useSiteData();
+  const { language } = useLanguage();
+
+  const localizedProducts = useMemo<Product[]>(() => {
+    if (language === 'en') return products;
+    return products.map(p => ({
+      ...p,
+      name: pick(p.name, p.name_tr) ?? p.name,
+      description: pick(p.description, p.description_tr) ?? p.description,
+      details: pickArr(p.details, p.details_tr) ?? p.details,
+      lightSource: pickArr(p.lightSource, p.lightSource_tr) ?? p.lightSource,
+      dimensions: pickArr(p.dimensions, p.dimensions_tr) ?? p.dimensions,
+      more_info: pick(p.more_info, p.more_info_tr) ?? p.more_info,
+    }));
+  }, [products, language]);
+
+  const localizedCategories = useMemo<Category[]>(() => {
+    if (language === 'en') return categories;
+    return categories.map(c => ({
+      ...c,
+      name: pick(c.name, c.name_tr) ?? c.name,
+      description: pick(c.description, c.description_tr) ?? c.description,
+    }));
+  }, [categories, language]);
+
+  const localizedDesigners = useMemo<Designer[]>(() => {
+    if (language === 'en') return designers;
+    return designers.map(d => ({
+      ...d,
+      role: pick(d.role, d.role_tr) ?? d.role,
+      bio: pick(d.bio, d.bio_tr) ?? d.bio,
+      collections: pick(d.collections, d.collections_tr) ?? d.collections,
+      quote: pick(d.quote, d.quote_tr) ?? d.quote,
+    }));
+  }, [designers, language]);
+
+  const localizedMediaCategories = useMemo<MediaCategory[]>(() => {
+    if (language === 'en') return mediaCategories;
+    return mediaCategories.map(m => ({
+      ...m,
+      name: pick(m.name, m.name_tr) ?? m.name,
+    }));
+  }, [mediaCategories, language]);
+
+  const localizedMaterialCategories = useMemo<MaterialCategory[]>(() => {
+    if (language === 'en') return materialCategories;
+    return materialCategories.map(m => ({
+      ...m,
+      name: pick(m.name, m.name_tr) ?? m.name,
+      description: pick(m.description, m.description_tr) ?? m.description,
+    }));
+  }, [materialCategories, language]);
+
+  const localizedContacts = useMemo<ContactInfo[]>(() => {
+    if (language === 'en') return contacts;
+    return contacts.map(c => ({
+      ...c,
+      title: pick(c.title, c.title_tr) ?? c.title,
+      address: pick(c.address, c.address_tr) ?? c.address,
+    }));
+  }, [contacts, language]);
+
+  const getSetting = (key: string): string => {
+    const base = siteSettings.find(s => s.key === key)?.value || '';
+    if (language === 'en') return base;
+    const tr = siteSettings.find(s => s.key === `${key}_tr`)?.value;
+    return tr && tr.trim() ? tr : base;
+  };
+
+  return {
+    ...rest,
+    siteSettings,
+    products: localizedProducts,
+    categories: localizedCategories,
+    designers: localizedDesigners,
+    mediaCategories: localizedMediaCategories,
+    materialCategories: localizedMaterialCategories,
+    contacts: localizedContacts,
+    getSetting,
+  };
 };

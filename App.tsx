@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { SiteProvider } from './context/SiteContext';
+import { LanguageProvider } from './context/LanguageContext';
+import { AuthProvider } from './context/AuthContext';
 import { MainSite } from './components/MainSite';
 import { Login } from './components/Admin/Login';
 import { Dashboard } from './components/Admin/Dashboard';
@@ -13,18 +15,29 @@ import { Designers } from './components/Designers';
 import { Catalogues } from './components/Catalogues';
 import { Contacts } from './components/Contacts';
 import { Philosophy } from './components/Philosophy';
-import { 
-  AllCollectionsWrapper, 
-  ProductGridWrapper, 
-  CategoryDetailWrapper, 
-  ProductDetailWrapper, 
-  MediaGalleryWrapper 
+import { Materials } from './components/Materials';
+import { News } from './components/News';
+import { NewsDetail } from './components/NewsDetail';
+import { TechnicalFiles } from './components/TechnicalFiles';
+import { AccountLogin } from './components/Auth/AccountLogin';
+import { AccountRegister } from './components/Auth/AccountRegister';
+import { ResetPassword } from './components/Auth/ResetPassword';
+import { LegalPage } from './components/Legal/LegalPage';
+import {
+  AllCollectionsWrapper,
+  ProductGridWrapper,
+  CategoryDetailWrapper,
+  ProductDetailWrapper,
+  MediaGalleryWrapper,
+  MaterialDetailWrapper
 } from './components/RouteWrappers';
 
 export default function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
+      <LanguageProvider>
+      <AuthProvider>
       <SiteProvider>
         <Routes>
           {/* Main Public Website */}
@@ -37,9 +50,21 @@ export default function App() {
             <Route path="designers" element={<Designers />} />
             <Route path="catalogues" element={<Catalogues />} />
             <Route path="media/:id" element={<MediaGalleryWrapper />} />
+            <Route path="materials" element={<Materials />} />
+            <Route path="materials/:id" element={<MaterialDetailWrapper />} />
             <Route path="contacts" element={<Contacts />} />
             <Route path="philosophy" element={<Philosophy />} />
+            <Route path="2d-3d" element={<TechnicalFiles />} />
+            <Route path="news" element={<News />} />
+            <Route path="news/:slug" element={<NewsDetail />} />
           </Route>
+
+          {/* Customer Account (register/login gate for 2D/3D downloads) */}
+          <Route path="/account/login" element={<AccountLogin />} />
+          <Route path="/account/register" element={<AccountRegister />} />
+          <Route path="/account/reset-password" element={<ResetPassword />} />
+          <Route path="/legal/terms" element={<LegalPage variant="terms" />} />
+          <Route path="/legal/privacy" element={<LegalPage variant="privacy" />} />
 
           {/* Admin Authentication */}
           <Route path="/yonetim-merkezi-x91/login" element={<Login />} />
@@ -53,6 +78,8 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </SiteProvider>
+      </AuthProvider>
+      </LanguageProvider>
     </BrowserRouter>
   );
 }

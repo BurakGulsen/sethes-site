@@ -1,5 +1,6 @@
 import React from 'react';
 import { Product } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 interface ProductGridProps {
   products: Product[];
@@ -7,6 +8,7 @@ interface ProductGridProps {
 }
 
 export const ProductGrid: React.FC<ProductGridProps> = ({ products, onCategoryClick }) => {
+  const { t } = useLanguage();
   // Array'in varlığını kontrol et
   if (!products) return null;
 
@@ -30,7 +32,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({ products, onCategoryCl
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-stone-300 text-stone-500 text-xs tracking-widest uppercase">
-                  No Image Available
+                  {t('productGrid.noImage')}
                 </div>
               )}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500"></div>
@@ -40,7 +42,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({ products, onCategoryCl
             <div className="flex items-center gap-3 pl-1">
               <span className="text-stone-900 font-normal text-xl leading-none transition-transform duration-500 group-hover:translate-x-1">+</span>
               <span className="font-condensed text-[16px] font-medium text-[#171719] tracking-[0.05em] uppercase">
-                {product?.name || 'Unnamed Product'}
+                {product?.name || t('productGrid.unnamedProduct')}
               </span>
             </div>
           </div>
@@ -48,7 +50,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({ products, onCategoryCl
         
         {products?.length === 0 && (
           <div className="col-span-full text-center text-stone-500 py-20 font-light">
-            No products found in the collection.
+            {t('productGrid.empty')}
           </div>
         )}
       </div>

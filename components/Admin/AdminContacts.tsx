@@ -8,15 +8,20 @@ export const AdminContacts: React.FC = () => {
   
   // Header State
   const [headerTitle, setHeaderTitle] = useState('');
+  const [headerTitleTr, setHeaderTitleTr] = useState('');
   const [headerId, setHeaderId] = useState<string | null>(null);
 
   // Menu Settings State
   const [navCommTitle, setNavCommTitle] = useState('');
+  const [navCommTitleTr, setNavCommTitleTr] = useState('');
   const [navContactsTitle, setNavContactsTitle] = useState('');
+  const [navContactsTitleTr, setNavContactsTitleTr] = useState('');
 
   // New Card State
   const [newTitle, setNewTitle] = useState('');
+  const [newTitleTr, setNewTitleTr] = useState('');
   const [newAddress, setNewAddress] = useState('');
+  const [newAddressTr, setNewAddressTr] = useState('');
   const [newEmail, setNewEmail] = useState('');
   const [newPhone, setNewPhone] = useState('');
 
@@ -24,22 +29,26 @@ export const AdminContacts: React.FC = () => {
     const header = contacts.find(c => c.type === 'header');
     if (header) {
         setHeaderTitle(header.title);
+        setHeaderTitleTr(header.title_tr || '');
         setHeaderId(header.id);
     }
-    
+
     setNavCommTitle(siteSettings?.find(s => s.key === 'nav_communication_title')?.value || 'Communication');
+    setNavCommTitleTr(siteSettings?.find(s => s.key === 'nav_communication_title_tr')?.value || '');
     setNavContactsTitle(siteSettings?.find(s => s.key === 'nav_contacts_title')?.value || 'Contacts');
+    setNavContactsTitleTr(siteSettings?.find(s => s.key === 'nav_contacts_title_tr')?.value || '');
   }, [contacts, siteSettings]);
 
   const handleUpdateHeader = async () => {
       if (headerId) {
-          await updateContact(headerId, { title: headerTitle });
+          await updateContact(headerId, { title: headerTitle, title_tr: headerTitleTr });
           alert('Header updated!');
       } else {
           // Create if not exists (though SQL should have created it)
           await addContact({
               type: 'header',
               title: headerTitle,
+              title_tr: headerTitleTr,
               sort_order: 0
           });
       }
@@ -47,7 +56,9 @@ export const AdminContacts: React.FC = () => {
 
   const handleUpdateMenuSettings = async () => {
       await updateSiteSetting('nav_communication_title', navCommTitle);
+      await updateSiteSetting('nav_communication_title_tr', navCommTitleTr);
       await updateSiteSetting('nav_contacts_title', navContactsTitle);
+      await updateSiteSetting('nav_contacts_title_tr', navContactsTitleTr);
       alert('Menu settings updated!');
   };
 
@@ -58,14 +69,18 @@ export const AdminContacts: React.FC = () => {
       await addContact({
           type: 'card',
           title: newTitle,
+          title_tr: newTitleTr,
           address: newAddress,
+          address_tr: newAddressTr,
           email: newEmail,
           phone: newPhone,
           sort_order: contacts.length + 1
       });
 
       setNewTitle('');
+      setNewTitleTr('');
       setNewAddress('');
+      setNewAddressTr('');
       setNewEmail('');
       setNewPhone('');
   };
@@ -88,8 +103,8 @@ export const AdminContacts: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                   <label className="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">Communication Menu Title</label>
-                  <input 
-                      type="text" 
+                  <input
+                      type="text"
                       value={navCommTitle}
                       onChange={(e) => setNavCommTitle(e.target.value)}
                       className="w-full p-3 bg-black border border-stone-800 text-white rounded-lg focus:border-white outline-none"
@@ -97,13 +112,31 @@ export const AdminContacts: React.FC = () => {
                   />
               </div>
               <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-yellow-600 block mb-2">Communication Menu Title (Türkçe)</label>
+                  <input
+                      type="text"
+                      value={navCommTitleTr}
+                      onChange={(e) => setNavCommTitleTr(e.target.value)}
+                      className="w-full p-3 bg-black border border-stone-800 text-white rounded-lg focus:border-white outline-none"
+                  />
+              </div>
+              <div>
                   <label className="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">Contacts Link Title</label>
-                  <input 
-                      type="text" 
+                  <input
+                      type="text"
                       value={navContactsTitle}
                       onChange={(e) => setNavContactsTitle(e.target.value)}
                       className="w-full p-3 bg-black border border-stone-800 text-white rounded-lg focus:border-white outline-none"
                       placeholder="Contacts"
+                  />
+              </div>
+              <div>
+                  <label className="text-xs font-bold uppercase tracking-wider text-yellow-600 block mb-2">Contacts Link Title (Türkçe)</label>
+                  <input
+                      type="text"
+                      value={navContactsTitleTr}
+                      onChange={(e) => setNavContactsTitleTr(e.target.value)}
+                      className="w-full p-3 bg-black border border-stone-800 text-white rounded-lg focus:border-white outline-none"
                   />
               </div>
           </div>
@@ -127,8 +160,8 @@ export const AdminContacts: React.FC = () => {
               <div className="space-y-4">
                   <div>
                       <label className="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">Title Text</label>
-                      <input 
-                          type="text" 
+                      <input
+                          type="text"
                           value={headerTitle}
                           onChange={(e) => setHeaderTitle(e.target.value)}
                           onMouseDown={(e) => e.stopPropagation()}
@@ -136,7 +169,17 @@ export const AdminContacts: React.FC = () => {
                           placeholder="e.g. VIA DELLA SPIGA 34..."
                       />
                   </div>
-                  <button 
+                  <div>
+                      <label className="text-xs font-bold uppercase tracking-wider text-yellow-600 block mb-2">Title Text (Türkçe)</label>
+                      <input
+                          type="text"
+                          value={headerTitleTr}
+                          onChange={(e) => setHeaderTitleTr(e.target.value)}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          className="w-full p-3 bg-black border border-stone-800 text-white rounded-lg focus:border-white outline-none"
+                      />
+                  </div>
+                  <button
                       onClick={handleUpdateHeader}
                       className="bg-white text-black px-6 py-2 rounded-lg font-bold uppercase tracking-wider hover:bg-stone-200 transition-colors flex items-center gap-2"
                   >
@@ -153,8 +196,8 @@ export const AdminContacts: React.FC = () => {
               <form onSubmit={handleAddCard} className="space-y-4">
                   <div>
                       <label className="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">Card Title</label>
-                      <input 
-                          type="text" 
+                      <input
+                          type="text"
                           value={newTitle}
                           onChange={(e) => setNewTitle(e.target.value)}
                           onMouseDown={(e) => e.stopPropagation()}
@@ -163,13 +206,33 @@ export const AdminContacts: React.FC = () => {
                       />
                   </div>
                   <div>
+                      <label className="text-xs font-bold uppercase tracking-wider text-yellow-600 block mb-2">Card Title (Türkçe)</label>
+                      <input
+                          type="text"
+                          value={newTitleTr}
+                          onChange={(e) => setNewTitleTr(e.target.value)}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          className="w-full p-3 bg-black border border-stone-800 text-white rounded-lg focus:border-white outline-none"
+                          placeholder="ör. SERGİ SALONU"
+                      />
+                  </div>
+                  <div>
                       <label className="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">Address</label>
-                      <textarea 
+                      <textarea
                           value={newAddress}
                           onChange={(e) => setNewAddress(e.target.value)}
                           onMouseDown={(e) => e.stopPropagation()}
                           className="w-full p-3 bg-black border border-stone-800 text-white rounded-lg focus:border-white outline-none h-24"
                           placeholder="Address details..."
+                      />
+                  </div>
+                  <div>
+                      <label className="text-xs font-bold uppercase tracking-wider text-yellow-600 block mb-2">Address (Türkçe)</label>
+                      <textarea
+                          value={newAddressTr}
+                          onChange={(e) => setNewAddressTr(e.target.value)}
+                          onMouseDown={(e) => e.stopPropagation()}
+                          className="w-full p-3 bg-black border border-stone-800 text-white rounded-lg focus:border-white outline-none h-24"
                       />
                   </div>
                   <div className="grid grid-cols-2 gap-4">

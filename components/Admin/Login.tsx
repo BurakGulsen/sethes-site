@@ -36,18 +36,14 @@ export const Login = () => {
                 placeholder="E-Posta"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                onMouseDown={(e) => e.stopPropagation()}
-                onSelect={(e) => (e.target as HTMLInputElement).focus()}
-                className="p-4 bg-stone-900 border border-stone-800 text-white rounded focus:outline-none focus:border-white"
+                onMouseDown={(e) => e.stopPropagation()}                className="p-4 bg-stone-900 border border-stone-800 text-white rounded focus:outline-none focus:border-white"
             />
             <input
                 type="password"
                 placeholder="Şifre"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                onMouseDown={(e) => e.stopPropagation()}
-                onSelect={(e) => (e.target as HTMLInputElement).focus()}
-                className="p-4 bg-stone-900 border border-stone-800 text-white rounded focus:outline-none focus:border-white"
+                onMouseDown={(e) => e.stopPropagation()}                className="p-4 bg-stone-900 border border-stone-800 text-white rounded focus:outline-none focus:border-white"
             />
             <button type="submit" className="bg-white text-black font-bold p-4 rounded hover:bg-gray-200 uppercase tracking-wider">
                 Gönder

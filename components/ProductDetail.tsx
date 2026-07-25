@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Product } from '../types';
 import { Download, Plus, Minus } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
+import { resolveTechnicalFileUrl } from '../lib/technicalFiles';
 
 interface ProductDetailProps {
   product: Product;
@@ -8,6 +12,10 @@ interface ProductDetailProps {
 }
 
 export const ProductDetail: React.FC<ProductDetailProps> = ({ product, onDesignerClick }) => {
+  const { t } = useLanguage();
+  const { session } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [scrollY, setScrollY] = useState(0);
   const [isMoreInfoOpen, setIsMoreInfoOpen] = useState(false);
   const [imgSrc, setImgSrc] = useState<string>(product.image || '');
@@ -36,15 +44,40 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, onDesigne
 
   const DownloadItem = ({ title, url }: { title: string, url?: string }) => {
       if (!url) return null;
-      
+
       return (
           <a href={url} target="_blank" rel="noopener noreferrer" className="group flex justify-between items-center py-4 border-b border-stone-200 hover:border-black transition-colors cursor-pointer">
               <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-stone-900 group-hover:text-black">{title}</span>
               <div className="flex items-center gap-2 text-stone-900 group-hover:text-black">
-                  <span className="text-[9px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">Download</span>
+                  <span className="text-[9px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">{t('productDetail.download')}</span>
                   <Download size={14} strokeWidth={1.5} />
               </div>
           </a>
+      );
+  };
+
+  // 2D/3D technical files require a login — unlike the other downloads above,
+  // clicking either redirects to login or resolves a short-lived signed URL.
+  const TechnicalDownloadItem = ({ title, path }: { title: string, path?: string }) => {
+      if (!path) return null;
+
+      const handleClick = async () => {
+          if (!session) {
+              navigate('/account/login?redirect=' + encodeURIComponent(location.pathname));
+              return;
+          }
+          const url = await resolveTechnicalFileUrl(path);
+          if (url) window.open(url, '_blank');
+      };
+
+      return (
+          <button onClick={handleClick} className="group flex justify-between items-center py-4 border-b border-stone-200 hover:border-black transition-colors cursor-pointer w-full text-left">
+              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-stone-900 group-hover:text-black">{title}</span>
+              <div className="flex items-center gap-2 text-stone-900 group-hover:text-black">
+                  <span className="text-[9px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">{t('productDetail.download')}</span>
+                  <Download size={14} strokeWidth={1.5} />
+              </div>
+          </button>
       );
   };
 
@@ -107,9 +140,9 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, onDesigne
                 {/* LEFT COLUMN: DESCRIPTION & MORE INFO */}
                 <div className="flex flex-col gap-16">
                     <div>
-                        <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-stone-400 mb-8">Description</h2>
+                        <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-stone-400 mb-8">{t('productDetail.description')}</h2>
                         <p className="text-xl md:text-2xl font-light leading-relaxed text-black text-justify">
-                            {product.description || "Every piece tells a story of matter and form. This object is a testament to the pursuit of perfection in imperfection, using materials that age with dignity."}
+                            {product.description || t('productDetail.defaultDescription')}
                         </p>
                     </div>
 
@@ -120,7 +153,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, onDesigne
                                 onClick={() => setIsMoreInfoOpen(!isMoreInfoOpen)}
                                 className="w-full flex justify-between items-center group"
                             >
-                                <span className="text-xs font-bold uppercase tracking-[0.2em] text-black group-hover:text-stone-600 transition-colors">More Info</span>
+                                <span className="text-xs font-bold uppercase tracking-[0.2em] text-black group-hover:text-stone-600 transition-colors">{t('productDetail.moreInfo')}</span>
                                 {isMoreInfoOpen ? <Minus size={16} /> : <Plus size={16} />}
                             </button>
                             
@@ -136,7 +169,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, onDesigne
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                                         {product.dimensions && product.dimensions.length > 0 && (
                                             <div>
-                                                <h4 className="text-[10px] font-bold uppercase mb-4 tracking-[0.2em] text-stone-400">Dimensions</h4>
+                                                <h4 className="text-[10px] font-bold uppercase mb-4 tracking-[0.2em] text-stone-400">{t('productDetail.dimensions')}</h4>
                                                 <div className="space-y-1 text-sm font-medium text-stone-900">
                                                     {renderList(product.dimensions)}
                                                 </div>
@@ -144,7 +177,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, onDesigne
                                         )}
                                         {product.details && product.details.length > 0 && (
                                             <div>
-                                                <h4 className="text-[10px] font-bold uppercase mb-4 tracking-[0.2em] text-stone-400">Materials</h4>
+                                                <h4 className="text-[10px] font-bold uppercase mb-4 tracking-[0.2em] text-stone-400">{t('productDetail.materials')}</h4>
                                                 <ul className="space-y-1 text-sm font-medium text-stone-900">
                                                     {renderList(product.details)}
                                                 </ul>
@@ -162,14 +195,14 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, onDesigne
                     
                     {/* Downloads Section */}
                     <div>
-                        <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-stone-400 mb-8">Downloads</h2>
+                        <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-stone-400 mb-8">{t('productDetail.downloads')}</h2>
                         <div className="flex flex-col">
-                            <DownloadItem title="Product Sheet" url={product.pdf_sheet || product.pdf_url} />
-                            <DownloadItem title="High-Res Images" url={product.pdf_images} />
-                            <DownloadItem title="2D / 3D Technical" url={product.pdf_technical} />
+                            <DownloadItem title={t('productDetail.productSheet')} url={product.pdf_sheet || product.pdf_url} />
+                            <DownloadItem title={t('productDetail.highResImages')} url={product.pdf_images} />
+                            <TechnicalDownloadItem title={t('productDetail.technical2d3d')} path={product.pdf_technical} />
                             {(!product.pdf_sheet && !product.pdf_url && !product.pdf_images && !product.pdf_technical) && (
                                 <div className="py-4 text-xs text-stone-400 italic border-b border-stone-200">
-                                    No downloads available.
+                                    {t('productDetail.noDownloads')}
                                 </div>
                             )}
                         </div>
@@ -178,8 +211,8 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, onDesigne
                     {/* Designer Section */}
                     {product.designer && (
                         <div>
-                            <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-stone-400 mb-8">Designer</h2>
-                            <div 
+                            <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-stone-400 mb-8">{t('productDetail.designer')}</h2>
+                            <div
                                 onClick={onDesignerClick}
                                 className="group cursor-pointer inline-block"
                             >
@@ -187,7 +220,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, onDesigne
                                     {product.designer}
                                 </h3>
                                 <p className="text-xs text-stone-500 mt-4 font-light leading-relaxed max-w-sm">
-                                    Discover the philosophy and other works by {product.designer}.
+                                    {t('productDetail.discoverPrefix')}{product.designer}.
                                 </p>
                             </div>
                         </div>

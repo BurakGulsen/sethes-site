@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Search, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '../lib/supabaseClient';
 import { Product } from '../types';
+import { useLocalizedSiteData } from '../context/SiteContext';
+import { useLanguage } from '../context/LanguageContext';
 
 interface SearchOverlayProps {
   isOpen: boolean;
@@ -11,9 +12,10 @@ interface SearchOverlayProps {
 }
 
 export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose, onProductClick }) => {
+  const { products } = useLocalizedSiteData();
+  const { t } = useLanguage();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Focus input when opened
@@ -33,32 +35,24 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose, o
     };
   }, [isOpen]);
 
-  // Search Logic with Debounce
+  // Search Logic — filters the already-loaded, language-resolved products
+  // client-side (no network round-trip), so results always match whichever
+  // language is currently active, and the query matches Turkish input too.
   useEffect(() => {
-    const delayDebounceFn = setTimeout(async () => {
-      if (query.trim().length > 1) {
-        setLoading(true);
-        try {
-          const { data, error } = await supabase
-            .from('products')
-            .select('*')
-            .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
-            .limit(10);
-
-          if (error) throw error;
-          setResults(data || []);
-        } catch (error) {
-          console.error('Search error:', error);
-        } finally {
-          setLoading(false);
-        }
+    const delayDebounceFn = setTimeout(() => {
+      const q = query.trim().toLowerCase();
+      if (q.length > 1) {
+        const filtered = products.filter(p =>
+          p.name?.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q)
+        ).slice(0, 10);
+        setResults(filtered);
       } else {
         setResults([]);
       }
-    }, 300);
+    }, 200);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [query]);
+  }, [query, products]);
 
   return (
     <AnimatePresence>
@@ -73,7 +67,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose, o
           {/* Header / Close Button */}
           <div className="flex justify-between items-center p-8 md:p-12">
             <div className="font-sans text-xl tracking-[0.2em] font-bold text-white uppercase">
-              SEARCH
+              {t('search.title')}
             </div>
             <button 
               onClick={onClose}
@@ -91,11 +85,9 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose, o
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Type here..."
+                placeholder={t('search.placeholder')}
                 className="w-full bg-transparent text-4xl md:text-6xl font-light text-white placeholder-white/20 outline-none border-none"
-                // Fix for selection issues
                 onMouseDown={(e) => e.stopPropagation()}
-                onSelect={(e) => (e.target as HTMLElement).focus()}
                 autoComplete="off"
               />
             </div>
@@ -103,9 +95,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose, o
 
           {/* Results Area */}
           <div className="flex-1 overflow-y-auto px-8 md:px-12 py-12 max-w-7xl mx-auto w-full scrollbar-hide">
-            {loading ? (
-              <div className="text-white/40 text-sm tracking-widest animate-pulse">SEARCHING...</div>
-            ) : results.length > 0 ? (
+            {results.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                 {results.map((product) => (
                   <motion.div
@@ -133,7 +123,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose, o
                         {product.category}
                       </p>
                       <span className="text-white/40 text-xs flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity transform translate-x-[-10px] group-hover:translate-x-0 duration-300">
-                        View Details <ArrowRight size={12} />
+                        {t('search.viewDetails')} <ArrowRight size={12} />
                       </span>
                     </div>
                   </motion.div>
@@ -141,7 +131,7 @@ export const SearchOverlay: React.FC<SearchOverlayProps> = ({ isOpen, onClose, o
               </div>
             ) : query.length > 1 ? (
               <div className="text-white/40 text-lg font-light">
-                No results found for "{query}"
+                {t('search.noResultsFor')}"{query}"
               </div>
             ) : null}
           </div>

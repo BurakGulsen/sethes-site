@@ -1,9 +1,11 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useSiteData } from '../context/SiteContext';
+import { useSiteData, useLocalizedSiteData } from '../context/SiteContext';
+import { useLanguage } from '../context/LanguageContext';
 import { CategoryDetail } from './CategoryDetail';
 import { ProductDetail } from './ProductDetail';
 import { MediaGallery } from './MediaGallery';
+import { MaterialDetail } from './MaterialDetail';
 
 import { ProductGrid } from './ProductGrid';
 
@@ -15,7 +17,7 @@ export const AllCollectionsWrapper: React.FC = () => {
 };
 
 export const ProductGridWrapper: React.FC = () => {
-    const { products } = useSiteData();
+    const { products } = useLocalizedSiteData();
     const navigate = useNavigate();
 
     return <ProductGrid products={products} onCategoryClick={(cat) => navigate(`/category/${cat}`)} />;
@@ -24,22 +26,28 @@ export const ProductGridWrapper: React.FC = () => {
 export const CategoryDetailWrapper: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { categories, products } = useSiteData();
+  const { t } = useLanguage();
+  const { categories, products } = useLocalizedSiteData();
+  // Raw (untranslated) categories — needed only to resolve the legacy
+  // products.category text-fallback match below, since that column is
+  // deliberately never translated and always stays the English name.
+  const { categories: rawCategories } = useSiteData();
 
   const category = categories.find(c => c.id === id || c.slug === id);
-  
+
   if (!category) {
       // Handle not found or loading
-      return <div className="min-h-screen pt-40 text-center">Category not found</div>;
+      return <div className="min-h-screen pt-40 text-center">{t('common.categoryNotFound')}</div>;
   }
 
-  const categoryProducts = products.filter(p => p.category_id === category.id || p.category === category.name);
+  const rawCategoryName = rawCategories.find(c => c.id === category.id)?.name;
+  const categoryProducts = products.filter(p => p.category_id === category.id || p.category === rawCategoryName);
 
   return (
-    <CategoryDetail 
-      categoryData={category} 
-      products={categoryProducts} 
-      onProductClick={(product) => navigate(`/product/${product.id}`)} 
+    <CategoryDetail
+      categoryData={category}
+      products={categoryProducts}
+      onProductClick={(product) => navigate(`/product/${product.id}`)}
     />
   );
 };
@@ -47,31 +55,47 @@ export const CategoryDetailWrapper: React.FC = () => {
 export const ProductDetailWrapper: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { products } = useSiteData();
+  const { t } = useLanguage();
+  const { products } = useLocalizedSiteData();
 
   const product = products.find(p => p.id === id);
 
   if (!product) {
-      return <div className="min-h-screen pt-40 text-center">Product not found</div>;
+      return <div className="min-h-screen pt-40 text-center">{t('common.productNotFound')}</div>;
   }
 
   return (
-    <ProductDetail 
-      product={product} 
-      onDesignerClick={() => navigate('/designers')} 
+    <ProductDetail
+      product={product}
+      onDesignerClick={() => navigate('/designers')}
     />
   );
 };
 
 export const MediaGalleryWrapper: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const { mediaCategories } = useSiteData();
-    
+    const { t } = useLanguage();
+    const { mediaCategories } = useLocalizedSiteData();
+
     const category = mediaCategories.find(c => c.id === id || c.slug === id);
 
     if (!category) {
-        return <div className="min-h-screen pt-40 text-center">Media Category not found</div>;
+        return <div className="min-h-screen pt-40 text-center">{t('common.mediaNotFound')}</div>;
     }
 
     return <MediaGallery category={category} />;
+};
+
+export const MaterialDetailWrapper: React.FC = () => {
+    const { id } = useParams<{ id: string }>();
+    const { t } = useLanguage();
+    const { materialCategories } = useLocalizedSiteData();
+
+    const category = materialCategories.find(c => c.id === id || c.slug === id);
+
+    if (!category) {
+        return <div className="min-h-screen pt-40 text-center">{t('common.materialNotFound')}</div>;
+    }
+
+    return <MaterialDetail category={category} />;
 };

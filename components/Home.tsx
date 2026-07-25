@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSiteData } from '../context/SiteContext';
+import { useLocalizedSiteData } from '../context/SiteContext';
+import { useLanguage } from '../context/LanguageContext';
 import { Hero } from './Hero';
 import { RevealOnScroll } from './RevealOnScroll';
 import { Flagship } from './Flagship';
@@ -9,7 +10,8 @@ import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
-  const { categories, siteSettings } = useSiteData();
+  const { categories, getSetting } = useLocalizedSiteData();
+  const { t } = useLanguage();
   
   // Collections Scroll Logic
   const collectionsScrollRef = useRef<HTMLDivElement>(null);
@@ -82,13 +84,13 @@ export const Home: React.FC = () => {
 
   return (
     <div className="relative z-10 bg-transparent">
-      <Hero 
-          onExplore={() => navigate('/collections')} 
-          videoUrl={siteSettings?.find(s => s.key === 'hero_video_url')?.value}
-          mediaType={(siteSettings?.find(s => s.key === 'hero_media_type')?.value as 'video' | 'image') || 'video'}
-          mediaUrl={siteSettings?.find(s => s.key === 'hero_media_url')?.value}
-          title={siteSettings?.find(s => s.key === 'hero_title')?.value}
-          subtitle={siteSettings?.find(s => s.key === 'hero_subtitle')?.value}
+      <Hero
+          onExplore={() => navigate('/collections')}
+          videoUrl={getSetting('hero_video_url')}
+          mediaType={(getSetting('hero_media_type') as 'video' | 'image') || 'video'}
+          mediaUrl={getSetting('hero_media_url')}
+          title={getSetting('hero_title')}
+          subtitle={getSetting('hero_subtitle')}
       />
       
       <div className="relative z-20 bg-[#f4f4f4]"> 
@@ -97,9 +99,9 @@ export const Home: React.FC = () => {
           <section className="py-24 px-4 md:px-10 max-w-[1920px] mx-auto">
               <div className="flex justify-between items-end mb-12 border-b border-stone-300 pb-4">
                   <h2 className="text-4xl font-condensed uppercase tracking-tight">
-                      {siteSettings?.find(s => s.key === 'collections_title')?.value || 'COLLECTIONS'}
+                      {getSetting('collections_title') || 'COLLECTIONS'}
                   </h2>
-                  <button onClick={() => navigate('/collections')} className="text-xs font-bold tracking-[0.2em] uppercase hover:text-stone-500">View All</button>
+                  <button onClick={() => navigate('/collections')} className="text-xs font-bold tracking-[0.2em] uppercase hover:text-stone-500">{t('home.viewAll')}</button>
               </div>
               
               <div className="relative group/slider">
@@ -141,7 +143,7 @@ export const Home: React.FC = () => {
                               <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex flex-col justify-end p-8 pointer-events-none">
                                   <h3 className="text-white text-3xl font-condensed uppercase">{cat.name}</h3>
                                   <p className="text-white/80 text-xs mt-2 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-4 group-hover:translate-y-0 duration-500">
-                                      Explore Collection <ArrowRight size={12} className="inline ml-1"/>
+                                      {t('home.exploreCollection')} <ArrowRight size={12} className="inline ml-1"/>
                                   </p>
                               </div>
                           </div>
@@ -152,18 +154,18 @@ export const Home: React.FC = () => {
         </RevealOnScroll>
         
         <RevealOnScroll>
-          <Flagship 
-            title={siteSettings?.find(s => s.key === 'story_title')?.value}
-            description={siteSettings?.find(s => s.key === 'story_description')?.value}
-            imageUrl={siteSettings?.find(s => s.key === 'story_image_url')?.value}
+          <Flagship
+            title={getSetting('story_title')}
+            description={getSetting('story_description')}
+            imageUrl={getSetting('story_image_url')}
           />
         </RevealOnScroll>
-        
+
         <RevealOnScroll>
-          <Projects 
-            videoUrl={siteSettings?.find(s => s.key === 'bespoke_video_url')?.value}
-            title={siteSettings?.find(s => s.key === 'bespoke_title')?.value}
-            subtitle={siteSettings?.find(s => s.key === 'bespoke_subtitle')?.value}
+          <Projects
+            videoUrl={getSetting('bespoke_video_url')}
+            title={getSetting('bespoke_title')}
+            subtitle={getSetting('bespoke_subtitle')}
           />
         </RevealOnScroll>
       </div>

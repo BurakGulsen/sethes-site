@@ -1,5 +1,6 @@
 import React from 'react';
-import { useSiteData } from '../context/SiteContext';
+import { useLocalizedSiteData } from '../context/SiteContext';
+import { useLanguage } from '../context/LanguageContext';
 
 // Using a cursive font from Google Fonts or a generic fallback for the signature
 const Signature: React.FC<{ name: string }> = ({ name }) => (
@@ -20,6 +21,7 @@ interface DesignerProps {
 }
 
 const DesignerCard: React.FC<DesignerProps> = ({ name, role, bio, collections, quote, image, align, grayscaleEnabled = true }) => {
+  const { t } = useLanguage();
   return (
     <div className={`flex flex-col ${align === 'left' ? 'md:flex-row' : 'md:flex-row-reverse'} gap-12 md:gap-24 mb-32 items-start`}>
       {/* Image Side */}
@@ -39,7 +41,7 @@ const DesignerCard: React.FC<DesignerProps> = ({ name, role, bio, collections, q
         </p>
 
         <div className="mb-8">
-          <span className="text-xs font-bold text-black uppercase tracking-widest block mb-2">Designer's Collections:</span>
+          <span className="text-xs font-bold text-black uppercase tracking-widest block mb-2">{t('designers.collectionsLabel')}</span>
           <ul className="text-stone-600 text-sm font-light space-y-1">
             {collections.map((col, idx) => (
               <li key={idx}>- {col}</li>
@@ -58,9 +60,10 @@ const DesignerCard: React.FC<DesignerProps> = ({ name, role, bio, collections, q
 };
 
 export const Designers: React.FC = () => {
-  const { designers: dbDesigners, siteSettings } = useSiteData();
-  
-  const grayscaleEnabled = siteSettings?.find(s => s.key === 'designers_grayscale')?.value === 'true';
+  const { designers: dbDesigners, getSetting } = useLocalizedSiteData();
+  const { t } = useLanguage();
+
+  const grayscaleEnabled = getSetting('designers_grayscale') === 'true';
 
   const defaultDesigners = [
     {
@@ -75,7 +78,7 @@ export const Designers: React.FC = () => {
     {
       name: "Zeynep Kaya",
       role: "Material Alchemist",
-      bio: "Zeynep, born in Ankara, is a graduate of ODTU Materials Engineering. She studies how pigments pass through translucent matter. With her Arbemix Vita series, she introduced thin amber veins that change tone with sunlight, blurring the line between stone and light.",
+      bio: "Zeynep, born in Ankara, is a graduate of ODTU Materials Engineering. She studies how pigments pass through translucent matter. With her Sethes Vita series, she introduced thin amber veins that change tone with sunlight, blurring the line between stone and light.",
       collections: ["Harmonia Collection", "LuminArt Collection", "Essenza Collection"],
       quote: "Color isn't just on the surface; it lives inside the material—waiting for light to unlock it.",
       image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=2500&auto=format&fit=crop",
@@ -84,7 +87,7 @@ export const Designers: React.FC = () => {
     {
       name: "E.G. TOPALOĞLU",
       role: "Industrial Designer",
-      bio: "Born in Istanbul, Topaloğlu graduated from Marmara University, Faculty of Architecture at the top of her class. In her first Metropol Aura series, she reimagines Arbemide® crystal panels as floating architectural volumes, designing mirrors that feel like illuminated facades.",
+      bio: "Born in Istanbul, Topaloğlu graduated from Marmara University, Faculty of Architecture at the top of her class. In her first Metropol Aura series, she reimagines Sethes® crystal panels as floating architectural volumes, designing mirrors that feel like illuminated facades.",
       collections: ["Forge Collection", "LuminAura Collection", "LuminArt Collection"],
       quote: "Istanbul taught me that every silhouette hides a story. I carve those stories into glass and light, so spaces can breathe like the city itself.",
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=2500&auto=format&fit=crop",
@@ -93,7 +96,7 @@ export const Designers: React.FC = () => {
     {
       name: "Burhan CEBECİ",
       role: "Lighting Sculptor",
-      bio: "Burhan, who completed his MA at the Technical University of Vienna, combines classical Italian light play with contemporary minimalism. LuminÉcho chandeliers use Arbemide® crystal panels to emit a warm, gallery-like glow.",
+      bio: "Burhan, who completed his MA at the Technical University of Vienna, combines classical Italian light play with contemporary minimalism. LuminÉcho chandeliers use Sethes® crystal panels to emit a warm, gallery-like glow.",
       collections: ["Pietra Collection", "Essenza Collection", "Harmonia Collections"],
       quote: "I treat illumination as a moving fresco—each beam paints the room anew.",
       image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2500&auto=format&fit=crop",
@@ -120,10 +123,10 @@ export const Designers: React.FC = () => {
         {/* Header Section */}
         <div className="mb-32">
           <h1 className="text-6xl md:text-8xl font-condensed text-black mb-6 tracking-tight leading-[0.9]">
-            The Minds <br/> Behind the Design
+            {t('designers.headingLine1')} <br/> {t('designers.headingLine2')}
           </h1>
           <p className="text-xl text-stone-600 font-light">
-            Every line, every detail carries their signature.
+            {t('designers.subheading')}
           </p>
         </div>
 
@@ -137,7 +140,7 @@ export const Designers: React.FC = () => {
         {/* Footer Quote */}
         <div className="mt-20 pt-12 border-t border-stone-300 text-center">
              <p className="italic text-stone-600 font-serif text-lg">
-                "Arbem is a unity of artisans and designers. In every piece, you feel their spirit."
+                "{t('designers.footerQuote')}"
              </p>
         </div>
 

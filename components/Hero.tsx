@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface HeroProps {
   onExplore: () => void;
@@ -12,6 +13,7 @@ interface HeroProps {
 export const Hero: React.FC<HeroProps> = ({ onExplore, videoUrl, mediaType = 'video', mediaUrl, title, subtitle }) => {
   const [scrollY, setScrollY] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,8 +34,8 @@ export const Hero: React.FC<HeroProps> = ({ onExplore, videoUrl, mediaType = 'vi
   // Determine active media URL
   // Priority: mediaUrl -> videoUrl -> default fallback
   const activeMediaUrl = mediaUrl || videoUrl || "https://videos.pexels.com/video-files/7515833/7515833-uhd_2160_3840_25fps.mp4";
-  const activeTitle = title || "S34/4 COLLECTION";
-  const activeSubtitle = subtitle || "UNWRITTEN STREETS";
+  const activeTitle = title || t('hero.defaultTitle');
+  const activeSubtitle = subtitle || t('hero.defaultSubtitle');
 
   return (
     <section className="relative h-screen w-full overflow-hidden bg-black sticky top-0 -z-10">
@@ -89,7 +91,7 @@ export const Hero: React.FC<HeroProps> = ({ onExplore, videoUrl, mediaType = 'vi
           className="group flex items-center gap-2 text-[11px] font-condensed font-bold tracking-[0.2em] uppercase text-white hover:text-stone-300 transition-colors"
         >
           <span className="text-lg leading-none transition-transform duration-500 group-hover:translate-x-1">+</span>
-          <span>READ MORE</span>
+          <span>{t('hero.readMore')}</span>
         </button>
       </div>
     </section>

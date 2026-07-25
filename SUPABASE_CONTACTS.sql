@@ -26,5 +26,5 @@ WHERE NOT EXISTS (SELECT 1 FROM contacts_info WHERE type = 'header');
 
 -- Insert some default cards if empty
 INSERT INTO contacts_info (type, title, address, email, phone, sort_order)
-SELECT 'card', 'SHOWROOM', 'Via della Spiga 34, 20121 Milano', 'showroom@arbem.com', '+39 02 1234567', 1
+SELECT 'card', 'SHOWROOM', 'Via della Spiga 34, 20121 Milano', 'showroom@sethes.com', '+39 02 1234567', 1
 WHERE NOT EXISTS (SELECT 1 FROM contacts_info WHERE type = 'card');

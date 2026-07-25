@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface ProjectsProps {
   videoUrl?: string;
@@ -9,10 +10,11 @@ interface ProjectsProps {
 export const Projects: React.FC<ProjectsProps> = ({ videoUrl, title, subtitle }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const { t } = useLanguage();
 
   const activeVideoUrl = videoUrl || "https://assets.mixkit.co/videos/preview/mixkit-bathroom-sink-faucet-running-water-4330-large.mp4";
-  const activeTitle = title || "Bespoke Projects";
-  const activeSubtitle = subtitle || "Signature stone washbasins and integrated water systems.";
+  const activeTitle = title || t('projects.defaultTitle');
+  const activeSubtitle = subtitle || t('projects.defaultSubtitle');
 
   useEffect(() => {
     // Ensure video plays on mount
@@ -71,7 +73,7 @@ export const Projects: React.FC<ProjectsProps> = ({ videoUrl, title, subtitle })
             </div>
             <button className="group flex items-center gap-3 text-xs font-bold tracking-[0.2em] uppercase text-black hover:text-stone-500 transition-colors">
                 <span className="text-lg leading-none transition-transform duration-300 group-hover:rotate-90">+</span>
-                <span>Discover</span>
+                <span>{t('projects.discover')}</span>
             </button>
           </div>
        </div>

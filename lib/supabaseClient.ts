@@ -1,8 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Not: import.meta.env.X şeklinde statik erişim şart — dinamik (bracket/değişken)
-// erişim Vite'ın tüm VITE_ önekli değişkenleri (Gemini key dahil) bundle'a
-// gömmesine neden olur.
+// erişim Vite'ın tüm VITE_ önekli değişkenleri bundle'a gömmesine neden olur.
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 

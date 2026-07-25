@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useSiteData } from '../context/SiteContext';
+import { useLocalizedSiteData } from '../context/SiteContext';
+import { useLanguage } from '../context/LanguageContext';
 import { motion } from 'framer-motion';
 import { MapPin, Mail, Phone, ArrowRight } from 'lucide-react';
 
 export const Contacts: React.FC = () => {
-  const { contacts } = useSiteData();
+  const { contacts } = useLocalizedSiteData();
+  const { t } = useLanguage();
   const [header, setHeader] = useState<string>('VIA DELLA SPIGA 34, 20121 MILANO');
   const [cards, setCards] = useState<any[]>([]);
 
@@ -79,10 +81,10 @@ export const Contacts: React.FC = () => {
         {/* Map Placeholder or Additional Info if needed */}
         <div className="mt-32 pt-12 border-t border-white/10 flex justify-between items-end opacity-50 hover:opacity-100 transition-opacity duration-500">
             <div className="text-xs font-bold tracking-[0.2em] uppercase text-stone-500">
-                Arbem Atelier &copy; {new Date().getFullYear()}
+                {t('contacts.copyrightBrand')} &copy; {new Date().getFullYear()}
             </div>
             <div className="text-xs font-bold tracking-[0.2em] uppercase text-stone-500 flex items-center gap-2">
-                Get Directions <ArrowRight size={14} />
+                {t('contacts.getDirections')} <ArrowRight size={14} />
             </div>
         </div>
 
