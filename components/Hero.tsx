@@ -55,9 +55,8 @@ export const Hero: React.FC<HeroProps> = ({ onExplore, videoUrl, mediaType = 'vi
             <video 
               key={activeMediaUrl} // Force re-render on URL change
               ref={videoRef}
-              autoPlay 
-              muted 
-              loop 
+              autoPlay
+              muted
               playsInline
               preload="auto"
               className="w-full h-full object-cover grayscale-[10%] brightness-[0.5] transition-transform duration-75"
