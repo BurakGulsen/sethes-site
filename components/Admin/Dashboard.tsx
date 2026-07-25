@@ -7,6 +7,7 @@ import { Product, Category, Designer } from '../../types';
 import { AdminMedia } from './AdminMedia';
 import { AdminContacts } from './AdminContacts';
 import { AdminMaterials } from './AdminMaterials';
+import { RichTextEditor } from './RichTextEditor';
 
 export const Dashboard = () => {
   const navigate = useNavigate();
@@ -70,6 +71,35 @@ export const Dashboard = () => {
   // Social Links State
   const [socialLinks, setSocialLinks] = useState<{platform: string, url: string}[]>([]);
   const [newSocial, setNewSocial] = useState({ platform: 'Instagram', url: '' });
+
+  // Legal Pages State (Terms & Conditions / Privacy Policy content)
+  const [termsContent, setTermsContent] = useState('');
+  const [termsContentTr, setTermsContentTr] = useState('');
+  const [privacyContent, setPrivacyContent] = useState('');
+  const [privacyContentTr, setPrivacyContentTr] = useState('');
+  const [legalLoaded, setLegalLoaded] = useState(false);
+  const [savingLegal, setSavingLegal] = useState(false);
+
+  React.useEffect(() => {
+      if (!legalLoaded && siteSettings.length > 0) {
+          setTermsContent(siteSettings.find(s => s.key === 'legal_terms_content')?.value || '');
+          setTermsContentTr(siteSettings.find(s => s.key === 'legal_terms_content_tr')?.value || '');
+          setPrivacyContent(siteSettings.find(s => s.key === 'legal_privacy_content')?.value || '');
+          setPrivacyContentTr(siteSettings.find(s => s.key === 'legal_privacy_content_tr')?.value || '');
+          setLegalLoaded(true);
+      }
+  }, [siteSettings, legalLoaded]);
+
+  const saveLegalContent = async () => {
+      setSavingLegal(true);
+      await Promise.all([
+          updateSiteSetting('legal_terms_content', termsContent),
+          updateSiteSetting('legal_terms_content_tr', termsContentTr),
+          updateSiteSetting('legal_privacy_content', privacyContent),
+          updateSiteSetting('legal_privacy_content_tr', privacyContentTr),
+      ]);
+      setSavingLegal(false);
+  };
 
   // Load social links from settings
   React.useEffect(() => {
@@ -1070,6 +1100,36 @@ export const Dashboard = () => {
                                       />
                                       <label htmlFor="grayscale" className="text-stone-400 text-xs">Enable Grayscale Effect on Designer Images</label>
                                   </div>
+                              </div>
+
+                              <div className="border-t border-stone-800 pt-8 mt-4">
+                                  <h4 className="text-white font-bold uppercase tracking-wider text-sm mb-2">Legal Pages (Terms &amp; Privacy)</h4>
+                                  <p className="text-stone-500 text-xs mb-6">Content shown on the public /legal/terms and /legal/privacy pages. Leave empty to keep showing the placeholder warning until you have reviewed legal text ready.</p>
+
+                                  <div className="space-y-2 mb-6">
+                                      <label className="text-[10px] uppercase font-bold text-stone-500 block">Terms &amp; Conditions</label>
+                                      <RichTextEditor value={termsContent} onChange={setTermsContent} />
+                                  </div>
+                                  <div className="space-y-2 mb-6">
+                                      <label className="text-[10px] uppercase font-bold text-yellow-600 block">Terms &amp; Conditions (Türkçe)</label>
+                                      <RichTextEditor value={termsContentTr} onChange={setTermsContentTr} />
+                                  </div>
+                                  <div className="space-y-2 mb-6">
+                                      <label className="text-[10px] uppercase font-bold text-stone-500 block">Privacy Policy / KVKK</label>
+                                      <RichTextEditor value={privacyContent} onChange={setPrivacyContent} />
+                                  </div>
+                                  <div className="space-y-2 mb-6">
+                                      <label className="text-[10px] uppercase font-bold text-yellow-600 block">Privacy Policy / KVKK (Türkçe)</label>
+                                      <RichTextEditor value={privacyContentTr} onChange={setPrivacyContentTr} />
+                                  </div>
+
+                                  <button
+                                      onClick={saveLegalContent}
+                                      disabled={savingLegal}
+                                      className={`bg-white text-black font-bold uppercase py-3 px-8 text-xs tracking-widest hover:bg-stone-200 transition-colors ${savingLegal ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                  >
+                                      {savingLegal ? 'Saving...' : 'Save Legal Pages'}
+                                  </button>
                               </div>
                       </div>
                   </div>
