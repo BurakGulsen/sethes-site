@@ -18,7 +18,9 @@ import { Philosophy } from './components/Philosophy';
 import { Materials } from './components/Materials';
 import { News } from './components/News';
 import { NewsDetail } from './components/NewsDetail';
-import { TechnicalFiles } from './components/TechnicalFiles';
+import { ReservedAreaLayout } from './components/ReservedArea/ReservedAreaLayout';
+import { ReservedAreaHome } from './components/ReservedArea/ReservedAreaHome';
+import { ReservedAreaProducts } from './components/ReservedArea/ReservedAreaProducts';
 import { AccountLogin } from './components/Auth/AccountLogin';
 import { AccountRegister } from './components/Auth/AccountRegister';
 import { ResetPassword } from './components/Auth/ResetPassword';
@@ -54,9 +56,14 @@ export default function App() {
             <Route path="materials/:id" element={<MaterialDetailWrapper />} />
             <Route path="contacts" element={<Contacts />} />
             <Route path="philosophy" element={<Philosophy />} />
-            <Route path="2d-3d" element={<TechnicalFiles />} />
             <Route path="news" element={<News />} />
             <Route path="news/:slug" element={<NewsDetail />} />
+          </Route>
+
+          {/* Reserved Area (login-gated 2D/3D downloads) */}
+          <Route path="/2d-3d" element={<ReservedAreaLayout />}>
+            <Route index element={<ReservedAreaHome />} />
+            <Route path="products" element={<ReservedAreaProducts />} />
           </Route>
 
           {/* Customer Account (register/login gate for 2D/3D downloads) */}
