@@ -18,7 +18,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, onDesigne
   const location = useLocation();
   const [scrollY, setScrollY] = useState(0);
   const [isMoreInfoOpen, setIsMoreInfoOpen] = useState(false);
-  const [imgSrc, setImgSrc] = useState<string>(product.image || '');
+  const [imgSrc, setImgSrc] = useState<string>(product.detail_image || product.image || '');
   const [imgLoaded, setImgLoaded] = useState(false);
 
   useEffect(() => {
@@ -27,7 +27,7 @@ export const ProductDetail: React.FC<ProductDetailProps> = ({ product, onDesigne
     window.addEventListener('scroll', handleScroll, { passive: true });
     
     // Reset image state when product changes
-    setImgSrc(product.image || '');
+    setImgSrc(product.detail_image || product.image || '');
     setImgLoaded(false);
 
     return () => window.removeEventListener('scroll', handleScroll);

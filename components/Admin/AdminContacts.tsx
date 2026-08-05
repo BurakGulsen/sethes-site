@@ -33,16 +33,16 @@ export const AdminContacts: React.FC = () => {
         setHeaderId(header.id);
     }
 
-    setNavCommTitle(siteSettings?.find(s => s.key === 'nav_communication_title')?.value || 'Communication');
+    setNavCommTitle(siteSettings?.find(s => s.key === 'nav_communication_title')?.value || 'İletişim');
     setNavCommTitleTr(siteSettings?.find(s => s.key === 'nav_communication_title_tr')?.value || '');
-    setNavContactsTitle(siteSettings?.find(s => s.key === 'nav_contacts_title')?.value || 'Contacts');
+    setNavContactsTitle(siteSettings?.find(s => s.key === 'nav_contacts_title')?.value || 'Kişiler');
     setNavContactsTitleTr(siteSettings?.find(s => s.key === 'nav_contacts_title_tr')?.value || '');
   }, [contacts, siteSettings]);
 
   const handleUpdateHeader = async () => {
       if (headerId) {
           await updateContact(headerId, { title: headerTitle, title_tr: headerTitleTr });
-          alert('Header updated!');
+          alert('Başlık güncellendi!');
       } else {
           // Create if not exists (though SQL should have created it)
           await addContact({
@@ -59,7 +59,7 @@ export const AdminContacts: React.FC = () => {
       await updateSiteSetting('nav_communication_title_tr', navCommTitleTr);
       await updateSiteSetting('nav_contacts_title', navContactsTitle);
       await updateSiteSetting('nav_contacts_title_tr', navContactsTitleTr);
-      alert('Menu settings updated!');
+      alert('Menü ayarları güncellendi!');
   };
 
   const handleAddCard = async (e: React.FormEvent) => {
@@ -86,33 +86,33 @@ export const AdminContacts: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-      if (confirm('Are you sure you want to delete this contact card?')) {
+      if (confirm('Bu iletişim kartını silmek istediğinizden emin misiniz?')) {
           await deleteContact(id);
       }
   };
 
   return (
     <div className="p-8 text-white">
-      <h2 className="text-3xl font-condensed uppercase mb-8">Contacts Management</h2>
+      <h2 className="text-3xl font-condensed uppercase mb-8">İletişim Yönetimi</h2>
 
       {/* Menu Settings Section */}
       <div className="bg-[#151515] p-8 rounded-xl border border-stone-800 h-fit mb-12">
           <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-white">
-              <Menu size={20} /> Navigation Menu Titles
+              <Menu size={20} /> Navigasyon Menü Başlıkları
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">Communication Menu Title</label>
+                  <label className="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">İletişim Menü Başlığı</label>
                   <input
                       type="text"
                       value={navCommTitle}
                       onChange={(e) => setNavCommTitle(e.target.value)}
                       className="w-full p-3 bg-black border border-stone-800 text-white rounded-lg focus:border-white outline-none"
-                      placeholder="Communication"
+                      placeholder="İletişim"
                   />
               </div>
               <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-yellow-600 block mb-2">Communication Menu Title (Türkçe)</label>
+                  <label className="text-xs font-bold uppercase tracking-wider text-yellow-600 block mb-2">İletişim Menü Başlığı (Türkçe)</label>
                   <input
                       type="text"
                       value={navCommTitleTr}
@@ -121,17 +121,17 @@ export const AdminContacts: React.FC = () => {
                   />
               </div>
               <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">Contacts Link Title</label>
+                  <label className="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">Kişiler Bağlantı Başlığı</label>
                   <input
                       type="text"
                       value={navContactsTitle}
                       onChange={(e) => setNavContactsTitle(e.target.value)}
                       className="w-full p-3 bg-black border border-stone-800 text-white rounded-lg focus:border-white outline-none"
-                      placeholder="Contacts"
+                      placeholder="Kişiler"
                   />
               </div>
               <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-yellow-600 block mb-2">Contacts Link Title (Türkçe)</label>
+                  <label className="text-xs font-bold uppercase tracking-wider text-yellow-600 block mb-2">Kişiler Bağlantı Başlığı (Türkçe)</label>
                   <input
                       type="text"
                       value={navContactsTitleTr}
@@ -141,11 +141,11 @@ export const AdminContacts: React.FC = () => {
               </div>
           </div>
           <div className="flex justify-end pt-4">
-              <button 
+              <button
                   onClick={handleUpdateMenuSettings}
                   className="bg-white text-black px-6 py-2 rounded-lg font-bold uppercase tracking-wider hover:bg-stone-200 transition-colors flex items-center gap-2"
               >
-                  <Save size={16} /> Update Menu Titles
+                  <Save size={16} /> Menü Başlıklarını Güncelle
               </button>
           </div>
       </div>
@@ -155,22 +155,22 @@ export const AdminContacts: React.FC = () => {
           {/* Main Header Section */}
           <div className="bg-[#151515] p-8 rounded-xl border border-stone-800 h-fit">
               <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-white">
-                  <Type size={20} /> Main Address Title
+                  <Type size={20} /> Ana Adres Başlığı
               </h3>
               <div className="space-y-4">
                   <div>
-                      <label className="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">Title Text</label>
+                      <label className="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">Başlık Metni</label>
                       <input
                           type="text"
                           value={headerTitle}
                           onChange={(e) => setHeaderTitle(e.target.value)}
                           onMouseDown={(e) => e.stopPropagation()}
                           className="w-full p-3 bg-black border border-stone-800 text-white rounded-lg focus:border-white outline-none"
-                          placeholder="e.g. VIA DELLA SPIGA 34..."
+                          placeholder="örn. VIA DELLA SPIGA 34..."
                       />
                   </div>
                   <div>
-                      <label className="text-xs font-bold uppercase tracking-wider text-yellow-600 block mb-2">Title Text (Türkçe)</label>
+                      <label className="text-xs font-bold uppercase tracking-wider text-yellow-600 block mb-2">Başlık Metni (Türkçe)</label>
                       <input
                           type="text"
                           value={headerTitleTr}
@@ -183,7 +183,7 @@ export const AdminContacts: React.FC = () => {
                       onClick={handleUpdateHeader}
                       className="bg-white text-black px-6 py-2 rounded-lg font-bold uppercase tracking-wider hover:bg-stone-200 transition-colors flex items-center gap-2"
                   >
-                      <Save size={16} /> Update Header
+                      <Save size={16} /> Başlığı Güncelle
                   </button>
               </div>
           </div>
@@ -191,18 +191,18 @@ export const AdminContacts: React.FC = () => {
           {/* Add New Card Section */}
           <div className="bg-[#151515] p-8 rounded-xl border border-stone-800 h-fit">
               <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-white">
-                  <Plus size={20} /> Add New Contact Card
+                  <Plus size={20} /> Yeni İletişim Kartı Ekle
               </h3>
               <form onSubmit={handleAddCard} className="space-y-4">
                   <div>
-                      <label className="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">Card Title</label>
+                      <label className="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">Kart Başlığı</label>
                       <input
                           type="text"
                           value={newTitle}
                           onChange={(e) => setNewTitle(e.target.value)}
                           onMouseDown={(e) => e.stopPropagation()}
                           className="w-full p-3 bg-black border border-stone-800 text-white rounded-lg focus:border-white outline-none"
-                          placeholder="e.g. SHOWROOM"
+                          placeholder="örn. SHOWROOM"
                       />
                   </div>
                   <div>
@@ -217,17 +217,17 @@ export const AdminContacts: React.FC = () => {
                       />
                   </div>
                   <div>
-                      <label className="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">Address</label>
+                      <label className="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">Adres</label>
                       <textarea
                           value={newAddress}
                           onChange={(e) => setNewAddress(e.target.value)}
                           onMouseDown={(e) => e.stopPropagation()}
                           className="w-full p-3 bg-black border border-stone-800 text-white rounded-lg focus:border-white outline-none h-24"
-                          placeholder="Address details..."
+                          placeholder="Adres detayları..."
                       />
                   </div>
                   <div>
-                      <label className="text-xs font-bold uppercase tracking-wider text-yellow-600 block mb-2">Address (Türkçe)</label>
+                      <label className="text-xs font-bold uppercase tracking-wider text-yellow-600 block mb-2">Adres (Türkçe)</label>
                       <textarea
                           value={newAddressTr}
                           onChange={(e) => setNewAddressTr(e.target.value)}
@@ -237,34 +237,34 @@ export const AdminContacts: React.FC = () => {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                       <div>
-                          <label className="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">Email</label>
-                          <input 
-                              type="text" 
+                          <label className="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">E-posta</label>
+                          <input
+                              type="text"
                               value={newEmail}
                               onChange={(e) => setNewEmail(e.target.value)}
                               onMouseDown={(e) => e.stopPropagation()}
                               className="w-full p-3 bg-black border border-stone-800 text-white rounded-lg focus:border-white outline-none"
-                              placeholder="email@example.com"
+                              placeholder="eposta@ornek.com"
                           />
                       </div>
                       <div>
-                          <label className="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">Phone</label>
-                          <input 
-                              type="text" 
+                          <label className="text-xs font-bold uppercase tracking-wider text-stone-500 block mb-2">Telefon</label>
+                          <input
+                              type="text"
                               value={newPhone}
                               onChange={(e) => setNewPhone(e.target.value)}
                               onMouseDown={(e) => e.stopPropagation()}
                               className="w-full p-3 bg-black border border-stone-800 text-white rounded-lg focus:border-white outline-none"
-                              placeholder="+39..."
+                              placeholder="+90..."
                           />
                       </div>
                   </div>
                   <div className="flex justify-end pt-2">
-                      <button 
+                      <button
                           type="submit"
                           className="bg-white text-black px-6 py-2 rounded-lg font-bold uppercase tracking-wider hover:bg-stone-200 transition-colors"
                       >
-                          Add Card
+                          Kart Ekle
                       </button>
                   </div>
               </form>
@@ -273,7 +273,7 @@ export const AdminContacts: React.FC = () => {
 
       {/* Existing Cards List */}
       <div className="mt-12">
-          <h3 className="text-xl font-bold mb-6 text-white border-b border-stone-800 pb-4">Existing Contact Cards</h3>
+          <h3 className="text-xl font-bold mb-6 text-white border-b border-stone-800 pb-4">Mevcut İletişim Kartları</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {contacts.filter(c => c.type === 'card').map(card => (
                   <div key={card.id} className="bg-[#151515] p-6 rounded-xl border border-stone-800 group relative">

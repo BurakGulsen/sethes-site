@@ -21,7 +21,7 @@ export const ProtectedRoute = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-white font-condensed tracking-widest">AUTHENTICATING...</div>;
+  if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-white font-condensed tracking-widest">DOĞRULANIYOR...</div>;
 
   // Redirect to home silently if not authenticated OR not an admin —
   // required now that ordinary visitors can also self-register and hold an

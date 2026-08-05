@@ -63,6 +63,7 @@ export interface Product {
   name: string;
   category: string; // Keep for fallback/display
   image: string;
+  detail_image?: string; // Optional separate hero image for the product detail page — falls back to `image` when empty
   description: string;
   designer?: string;
   

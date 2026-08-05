@@ -77,7 +77,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
   if (!editor) return null;
 
   const setLink = () => {
-    const url = window.prompt('Link URL:');
+    const url = window.prompt('Bağlantı URL\'si:');
     if (url) editor.chain().focus().setLink({ href: url }).run();
   };
 
@@ -92,14 +92,14 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange,
   return (
     <div className="border border-stone-800 rounded-lg bg-black overflow-hidden">
       <div className="flex items-center gap-1 border-b border-stone-800 p-2 flex-wrap">
-        <ToolbarButton title="Bold" active={editor.isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()}><Bold size={14} /></ToolbarButton>
-        <ToolbarButton title="Italic" active={editor.isActive('italic')} onClick={() => editor.chain().focus().toggleItalic().run()}><Italic size={14} /></ToolbarButton>
-        <ToolbarButton title="Heading 2" active={editor.isActive('heading', { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}><Heading2 size={14} /></ToolbarButton>
-        <ToolbarButton title="Heading 3" active={editor.isActive('heading', { level: 3 })} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}><Heading3 size={14} /></ToolbarButton>
-        <ToolbarButton title="Bullet List" active={editor.isActive('bulletList')} onClick={() => editor.chain().focus().toggleBulletList().run()}><List size={14} /></ToolbarButton>
-        <ToolbarButton title="Ordered List" active={editor.isActive('orderedList')} onClick={() => editor.chain().focus().toggleOrderedList().run()}><ListOrdered size={14} /></ToolbarButton>
-        <ToolbarButton title="Link" active={editor.isActive('link')} onClick={setLink}><LinkIcon size={14} /></ToolbarButton>
-        <ToolbarButton title="Image" onClick={() => fileInputRef.current?.click()}><ImageIcon size={14} /></ToolbarButton>
+        <ToolbarButton title="Kalın" active={editor.isActive('bold')} onClick={() => editor.chain().focus().toggleBold().run()}><Bold size={14} /></ToolbarButton>
+        <ToolbarButton title="İtalik" active={editor.isActive('italic')} onClick={() => editor.chain().focus().toggleItalic().run()}><Italic size={14} /></ToolbarButton>
+        <ToolbarButton title="Başlık 2" active={editor.isActive('heading', { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}><Heading2 size={14} /></ToolbarButton>
+        <ToolbarButton title="Başlık 3" active={editor.isActive('heading', { level: 3 })} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}><Heading3 size={14} /></ToolbarButton>
+        <ToolbarButton title="Madde İşaretli Liste" active={editor.isActive('bulletList')} onClick={() => editor.chain().focus().toggleBulletList().run()}><List size={14} /></ToolbarButton>
+        <ToolbarButton title="Numaralı Liste" active={editor.isActive('orderedList')} onClick={() => editor.chain().focus().toggleOrderedList().run()}><ListOrdered size={14} /></ToolbarButton>
+        <ToolbarButton title="Bağlantı" active={editor.isActive('link')} onClick={setLink}><LinkIcon size={14} /></ToolbarButton>
+        <ToolbarButton title="Görsel" onClick={() => fileInputRef.current?.click()}><ImageIcon size={14} /></ToolbarButton>
         <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageSelected} className="hidden" />
       </div>
       <EditorContent editor={editor} className="text-white" placeholder={placeholder} />

@@ -86,12 +86,12 @@ export const AdminMedia: React.FC = () => {
           fetchCategories();
       } catch (error: any) {
           console.error('Error adding category:', error);
-          alert('Error adding category: ' + error.message);
+          alert('Kategori eklenirken hata oluştu: ' + error.message);
       }
   };
 
   const handleDeleteCategory = async (id: string) => {
-      if (!confirm('Are you sure? This will delete all items in this category.')) return;
+      if (!confirm('Emin misiniz? Bu, kategorideki tüm öğeleri silecek.')) return;
       try {
           const { error } = await supabase.from('media_categories').delete().eq('id', id);
           if (error) throw error;
@@ -105,7 +105,7 @@ export const AdminMedia: React.FC = () => {
   const handleUploadItem = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!coverFile || !title || !selectedCategory) {
-        alert('Please provide title and cover image.');
+        alert('Lütfen başlık ve kapak görseli girin.');
         return;
     }
 
@@ -153,18 +153,18 @@ export const AdminMedia: React.FC = () => {
         setCoverFile(null);
         setPdfFile(null);
         fetchItems(selectedCategory);
-        alert('Item uploaded successfully!');
+        alert('Öğe başarıyla yüklendi!');
 
     } catch (error: any) {
         console.error('Upload error:', error);
-        alert(`Error uploading item: ${error.message}`);
+        alert(`Öğe yüklenirken hata oluştu: ${error.message}`);
     } finally {
         setUploading(false);
     }
   };
 
   const handleDeleteItem = async (id: string) => {
-      if (!confirm('Are you sure you want to delete this item?')) return;
+      if (!confirm('Bu öğeyi silmek istediğinizden emin misiniz?')) return;
       try {
           const { error } = await supabase.from('media_items').delete().eq('id', id);
           if (error) throw error;
@@ -176,7 +176,7 @@ export const AdminMedia: React.FC = () => {
 
   return (
     <div className="p-8 text-white">
-      <h2 className="text-3xl font-condensed uppercase mb-8">Manage Media</h2>
+      <h2 className="text-3xl font-condensed uppercase mb-8">Medyayı Yönet</h2>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
@@ -184,7 +184,7 @@ export const AdminMedia: React.FC = () => {
           <div className="lg:col-span-1 space-y-8">
               <div className="bg-[#151515] p-6 rounded-xl border border-stone-800">
                   <h3 className="text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2 text-stone-400">
-                      <Folder size={16} /> Categories
+                      <Folder size={16} /> Kategoriler
                   </h3>
                   
                   <div className="space-y-2 mb-6">
@@ -193,7 +193,7 @@ export const AdminMedia: React.FC = () => {
                         onClick={() => setSelectedCategory('STATIC_CATALOGUES')}
                         className={`p-3 rounded-lg cursor-pointer flex justify-between items-center group transition-colors ${selectedCategory === 'STATIC_CATALOGUES' ? 'bg-stone-800 text-white' : 'hover:bg-stone-900 text-stone-400'}`}
                       >
-                          <span className="font-medium text-sm flex items-center gap-2"><BookOpen size={14} /> Catalogues</span>
+                          <span className="font-medium text-sm flex items-center gap-2"><BookOpen size={14} /> Kataloglar</span>
                       </div>
 
                       <div
@@ -226,7 +226,7 @@ export const AdminMedia: React.FC = () => {
                         value={newCatName}
                         onChange={(e) => setNewCatName(e.target.value)}
                         onMouseDown={(e) => e.stopPropagation()}
-                        placeholder="New Category..."
+                        placeholder="Yeni Kategori..."
                         className="w-full bg-black border border-stone-800 rounded p-2 text-xs text-white focus:border-stone-600 outline-none"
                       />
                       <input
@@ -257,18 +257,18 @@ export const AdminMedia: React.FC = () => {
                     {/* Upload Form */}
                     <div className="bg-[#151515] p-8 rounded-xl shadow-sm border border-stone-800 mb-8">
                         <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-white">
-                            <Plus size={20} /> Add Item to {categories.find(c => c.id === selectedCategory)?.name}
+                            <Plus size={20} /> {categories.find(c => c.id === selectedCategory)?.name} İçin Öğe Ekle
                         </h3>
                         <form onSubmit={handleUploadItem} className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             <div className="space-y-2">
-                                <label className="text-xs font-bold uppercase tracking-wider text-stone-500">Title</label>
+                                <label className="text-xs font-bold uppercase tracking-wider text-stone-500">Başlık</label>
                                 <input
                                     type="text"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
                                     onMouseDown={(e) => e.stopPropagation()}
                                     className="w-full p-3 bg-black border border-stone-800 text-white rounded-lg focus:border-white outline-none"
-                                    placeholder="e.g. Press Release 2024"
+                                    placeholder="örn. Basın Bülteni 2024"
                                 />
                             </div>
 
@@ -284,10 +284,10 @@ export const AdminMedia: React.FC = () => {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-bold uppercase tracking-wider text-stone-500">Cover Image</label>
+                                <label className="text-xs font-bold uppercase tracking-wider text-stone-500">Kapak Görseli</label>
                                 <div className="relative border-2 border-dashed border-stone-700 rounded-lg p-4 hover:bg-stone-800 transition-colors text-center cursor-pointer">
-                                    <input 
-                                        type="file" 
+                                    <input
+                                        type="file"
                                         accept="image/*"
                                         onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
                                         onMouseDown={(e) => e.stopPropagation()}
@@ -295,16 +295,16 @@ export const AdminMedia: React.FC = () => {
                                     />
                                     <div className="flex flex-col items-center gap-2 text-stone-400">
                                         <Upload size={24} />
-                                        <span className="text-xs">{coverFile ? coverFile.name : 'Click to upload cover'}</span>
+                                        <span className="text-xs">{coverFile ? coverFile.name : 'Kapak yüklemek için tıklayın'}</span>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-bold uppercase tracking-wider text-stone-500">PDF File (Optional)</label>
+                                <label className="text-xs font-bold uppercase tracking-wider text-stone-500">PDF Dosyası (Opsiyonel)</label>
                                 <div className="relative border-2 border-dashed border-stone-700 rounded-lg p-4 hover:bg-stone-800 transition-colors text-center cursor-pointer">
-                                    <input 
-                                        type="file" 
+                                    <input
+                                        type="file"
                                         accept="application/pdf"
                                         onChange={(e) => setPdfFile(e.target.files?.[0] || null)}
                                         onMouseDown={(e) => e.stopPropagation()}
@@ -312,18 +312,18 @@ export const AdminMedia: React.FC = () => {
                                     />
                                     <div className="flex flex-col items-center gap-2 text-stone-400">
                                         <FileText size={24} />
-                                        <span className="text-xs">{pdfFile ? pdfFile.name : 'Click to upload PDF'}</span>
+                                        <span className="text-xs">{pdfFile ? pdfFile.name : 'PDF yüklemek için tıklayın'}</span>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="md:col-span-3 flex justify-end">
-                                <button 
-                                    type="submit" 
+                                <button
+                                    type="submit"
                                     disabled={uploading}
                                     className={`bg-white text-black px-8 py-3 rounded-lg font-bold uppercase tracking-wider hover:bg-stone-200 transition-colors ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
-                                    {uploading ? 'Uploading...' : 'Publish Item'}
+                                    {uploading ? 'Yükleniyor...' : 'Öğeyi Yayınla'}
                                 </button>
                             </div>
                         </form>
@@ -356,7 +356,7 @@ export const AdminMedia: React.FC = () => {
                         ))}
                         {items.length === 0 && (
                             <div className="col-span-full text-center py-12 text-stone-600 italic">
-                                No items in this category yet.
+                                Bu kategoride henüz öğe yok.
                             </div>
                         )}
                     </div>
@@ -364,7 +364,7 @@ export const AdminMedia: React.FC = () => {
               ) : (
                   <div className="flex flex-col items-center justify-center h-64 text-stone-500 border border-dashed border-stone-800 rounded-xl">
                       <FolderPlus size={48} className="mb-4 opacity-50" />
-                      <p>Select or create a category to manage items.</p>
+                      <p>Öğeleri yönetmek için bir kategori seçin veya oluşturun.</p>
                   </div>
               )}
           </div>

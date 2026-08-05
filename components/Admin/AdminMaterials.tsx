@@ -116,14 +116,14 @@ export const AdminMaterials: React.FC = () => {
       await refreshData();
     } catch (error: any) {
       console.error('Error saving category:', error);
-      alert('Error saving material: ' + error.message);
+      alert('Materyal kaydedilirken hata oluştu: ' + error.message);
     } finally {
       setUploading(false);
     }
   };
 
   const handleDeleteCategory = async (id: string) => {
-    if (!confirm('Are you sure? This will delete the material and all its swatches.')) return;
+    if (!confirm('Emin misiniz? Bu, materyali ve tüm örneklerini silecek.')) return;
     try {
       const { error } = await supabase.from('material_categories').delete().eq('id', id);
       if (error) throw error;
@@ -132,20 +132,20 @@ export const AdminMaterials: React.FC = () => {
       await refreshData();
     } catch (error: any) {
       console.error('Error deleting category:', error);
-      alert('Error: ' + error.message);
+      alert('Hata: ' + error.message);
     }
   };
 
   const handleAddSwatch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!swatchImageFile || !swatchName || !selectedCategory) {
-      alert('Please provide a swatch name and image.');
+      alert('Lütfen bir örnek adı ve görsel girin.');
       return;
     }
     setUploading(true);
     try {
       const url = await uploadFile(swatchImageFile, 'materials');
-      if (!url) throw new Error('Image upload failed.');
+      if (!url) throw new Error('Görsel yüklenemedi.');
 
       const { error } = await supabase.from('material_swatches').insert([{
         category_id: selectedCategory,
@@ -160,14 +160,14 @@ export const AdminMaterials: React.FC = () => {
       await fetchSwatches(selectedCategory);
     } catch (error: any) {
       console.error('Error adding swatch:', error);
-      alert('Error adding swatch: ' + error.message);
+      alert('Örnek eklenirken hata oluştu: ' + error.message);
     } finally {
       setUploading(false);
     }
   };
 
   const handleDeleteSwatch = async (id: string) => {
-    if (!confirm('Delete this swatch?')) return;
+    if (!confirm('Bu örnek silinsin mi?')) return;
     try {
       const { error } = await supabase.from('material_swatches').delete().eq('id', id);
       if (error) throw error;
@@ -181,7 +181,7 @@ export const AdminMaterials: React.FC = () => {
 
   return (
     <div className="p-8 text-white">
-      <h2 className="text-3xl font-condensed uppercase mb-8">Manage Materials</h2>
+      <h2 className="text-3xl font-condensed uppercase mb-8">Materyalleri Yönet</h2>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
@@ -189,7 +189,7 @@ export const AdminMaterials: React.FC = () => {
         <div className="lg:col-span-1 space-y-8">
           <div className="bg-[#151515] p-6 rounded-xl border border-stone-800">
             <h3 className="text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2 text-stone-400">
-              <Folder size={16} /> Materials
+              <Folder size={16} /> Materyaller
             </h3>
 
             <div className="space-y-2 mb-6">
@@ -217,7 +217,7 @@ export const AdminMaterials: React.FC = () => {
                 </div>
               ))}
               {categories.length === 0 && (
-                <p className="text-stone-600 text-xs italic">No materials yet.</p>
+                <p className="text-stone-600 text-xs italic">Henüz materyal yok.</p>
               )}
             </div>
 
@@ -225,11 +225,11 @@ export const AdminMaterials: React.FC = () => {
             <form onSubmit={handleSaveCategory} className="space-y-3 border-t border-stone-800 pt-4">
               <div className="flex justify-between items-center">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
-                  {editingCatId ? 'Edit Material' : 'New Material'}
+                  {editingCatId ? 'Materyali Düzenle' : 'Yeni Materyal'}
                 </p>
                 {editingCatId && (
                   <button type="button" onClick={resetCatForm} className="text-stone-500 hover:text-white flex items-center gap-1 text-[10px] uppercase">
-                    <X size={12} /> Cancel
+                    <X size={12} /> İptal
                   </button>
                 )}
               </div>
@@ -238,7 +238,7 @@ export const AdminMaterials: React.FC = () => {
                 value={catName}
                 onChange={(e) => setCatName(e.target.value)}
                 onMouseDown={(e) => e.stopPropagation()}
-                placeholder="Material name (e.g. Fabrics)"
+                placeholder="Materyal adı (örn. Kumaşlar)"
                 className="w-full bg-black border border-stone-800 rounded p-2 text-xs text-white focus:border-stone-600 outline-none"
               />
               <input
@@ -253,7 +253,7 @@ export const AdminMaterials: React.FC = () => {
                 value={catDescription}
                 onChange={(e) => setCatDescription(e.target.value)}
                 onMouseDown={(e) => e.stopPropagation()}
-                placeholder="Caption (optional)"
+                placeholder="Açıklama (opsiyonel)"
                 className="w-full bg-black border border-stone-800 rounded p-2 text-xs text-white focus:border-stone-600 outline-none h-16"
               />
               <textarea
@@ -273,7 +273,7 @@ export const AdminMaterials: React.FC = () => {
                 />
                 <div className="flex flex-col items-center gap-1 text-stone-400">
                   <Upload size={18} />
-                  <span className="text-[10px]">{catImageFile ? catImageFile.name : 'Cover image (optional)'}</span>
+                  <span className="text-[10px]">{catImageFile ? catImageFile.name : 'Kapak görseli (opsiyonel)'}</span>
                 </div>
               </div>
               <button
@@ -281,7 +281,7 @@ export const AdminMaterials: React.FC = () => {
                 disabled={uploading}
                 className="w-full bg-white text-black py-2 rounded text-xs font-bold uppercase tracking-wider hover:bg-stone-200 disabled:opacity-50 flex items-center justify-center gap-1"
               >
-                <Plus size={14} /> {uploading ? 'Saving...' : (editingCatId ? 'Update' : 'Add Material')}
+                <Plus size={14} /> {uploading ? 'Kaydediliyor...' : (editingCatId ? 'Güncelle' : 'Materyal Ekle')}
               </button>
             </form>
           </div>
@@ -294,23 +294,23 @@ export const AdminMaterials: React.FC = () => {
               {/* Add swatch form */}
               <div className="bg-[#151515] p-8 rounded-xl shadow-sm border border-stone-800 mb-8">
                 <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-white">
-                  <Plus size={20} /> Add Swatch to {selectedCat.name}
+                  <Plus size={20} /> {selectedCat.name} İçin Örnek Ekle
                 </h3>
                 <form onSubmit={handleAddSwatch} className="grid grid-cols-1 md:grid-cols-3 gap-8 items-end">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500">Swatch Name</label>
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500">Örnek Adı</label>
                     <input
                       type="text"
                       value={swatchName}
                       onChange={(e) => setSwatchName(e.target.value)}
                       onMouseDown={(e) => e.stopPropagation()}
                       className="w-full p-3 bg-black border border-stone-800 text-white rounded-lg focus:border-white outline-none"
-                      placeholder="e.g. ABARTH 26"
+                      placeholder="örn. ABARTH 26"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500">Swatch Image</label>
+                    <label className="text-xs font-bold uppercase tracking-wider text-stone-500">Örnek Görseli</label>
                     <div className="relative border-2 border-dashed border-stone-700 rounded-lg p-4 hover:bg-stone-800 transition-colors text-center cursor-pointer">
                       <input
                         type="file"
@@ -321,7 +321,7 @@ export const AdminMaterials: React.FC = () => {
                       />
                       <div className="flex flex-col items-center gap-2 text-stone-400">
                         <Upload size={24} />
-                        <span className="text-xs">{swatchImageFile ? swatchImageFile.name : 'Click to upload'}</span>
+                        <span className="text-xs">{swatchImageFile ? swatchImageFile.name : 'Yüklemek için tıklayın'}</span>
                       </div>
                     </div>
                   </div>
@@ -331,7 +331,7 @@ export const AdminMaterials: React.FC = () => {
                     disabled={uploading}
                     className={`bg-white text-black px-8 py-3 rounded-lg font-bold uppercase tracking-wider hover:bg-stone-200 transition-colors ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    {uploading ? 'Uploading...' : 'Add Swatch'}
+                    {uploading ? 'Yükleniyor...' : 'Örnek Ekle'}
                   </button>
                 </form>
               </div>
@@ -356,7 +356,7 @@ export const AdminMaterials: React.FC = () => {
                 ))}
                 {swatches.length === 0 && (
                   <div className="col-span-full text-center py-12 text-stone-600 italic">
-                    No swatches in this material yet.
+                    Bu materyalde henüz örnek yok.
                   </div>
                 )}
               </div>
@@ -364,7 +364,7 @@ export const AdminMaterials: React.FC = () => {
           ) : (
             <div className="flex flex-col items-center justify-center h-64 text-stone-500 border border-dashed border-stone-800 rounded-xl">
               <FolderPlus size={48} className="mb-4 opacity-50" />
-              <p>Create or select a material to manage its swatches.</p>
+              <p>Örneklerini yönetmek için bir materyal oluşturun veya seçin.</p>
             </div>
           )}
         </div>
